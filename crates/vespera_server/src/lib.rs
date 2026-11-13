@@ -2,6 +2,7 @@ mod characters;
 mod intents;
 mod movement;
 mod privacy;
+mod transport;
 
 use bevy::app::PluginGroupBuilder;
 use bevy::prelude::*;
@@ -10,6 +11,7 @@ use vespera_protocol::ProtocolPlugin;
 use vespera_rules::woodcutting::WoodcuttingPlugin;
 
 pub use characters::Controls;
+pub use transport::{ListenError, MAX_PLAYERS, listen};
 
 pub struct ShardPlugins;
 

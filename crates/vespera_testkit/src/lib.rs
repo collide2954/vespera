@@ -3,6 +3,8 @@
     reason = "the test kit is test code, so a failed expectation stops the test with a clear message"
 )]
 
+mod udp;
+
 use std::path::Path;
 use std::time::Duration;
 
@@ -22,6 +24,8 @@ use vespera_rules::skills::{Skill, Skills};
 use vespera_rules::woodcutting::Tree;
 use vespera_server::{Controls, ShardPlugins};
 
+pub use udp::UdpTestShard;
+
 pub const TICK: Duration = Duration::from_nanos(16_666_667);
 
 const MAX_WAIT_TICKS: u32 = 120;
@@ -37,8 +41,6 @@ pub struct TestShard {
 impl TestShard {
     #[must_use]
     pub fn new() -> Self {
-        let content = Content::load(&Path::new(env!("CARGO_MANIFEST_DIR")).join("../../content"))
-            .expect("the repository content is valid");
         let mut server = App::new();
         server
             .add_plugins((
@@ -46,7 +48,7 @@ impl TestShard {
                 StatesPlugin,
                 ShardPlugins.set(ServerPlugin::new(PostUpdate)),
             ))
-            .insert_resource(content);
+            .insert_resource(repository_content());
         use_fixed_ticks(&mut server);
         server.finish();
         Self {
@@ -244,6 +246,11 @@ impl Default for TestShard {
     fn default() -> Self {
         Self::new()
     }
+}
+
+fn repository_content() -> Content {
+    Content::load(&Path::new(env!("CARGO_MANIFEST_DIR")).join("../../content"))
+        .expect("the repository content is valid")
 }
 
 fn use_fixed_ticks(app: &mut App) {

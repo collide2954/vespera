@@ -1,4 +1,5 @@
 mod prediction;
+mod transport;
 
 use bevy::app::PluginGroupBuilder;
 use bevy::prelude::*;
@@ -6,6 +7,7 @@ use bevy_replicon::prelude::*;
 use vespera_protocol::{Possess, ProtocolPlugin};
 
 pub use prediction::{LocalMoveInput, Prediction};
+pub use transport::{ConnectError, connect};
 
 pub struct ClientLogicPlugins;
 

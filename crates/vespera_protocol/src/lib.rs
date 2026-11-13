@@ -8,6 +8,8 @@ use vespera_rules::pack::Pack;
 use vespera_rules::skills::Skills;
 use vespera_rules::woodcutting::{Felled, Tree};
 
+pub const PROTOCOL_ID: u64 = u64::from_le_bytes(*b"vespera0");
+
 pub struct ProtocolPlugin;
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
