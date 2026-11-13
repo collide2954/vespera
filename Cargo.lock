@@ -4610,6 +4610,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "vespera_motion"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "serde",
+]
+
+[[package]]
 name = "vespera_protocol"
 version = "0.1.0"
 dependencies = [

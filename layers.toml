@@ -3,6 +3,7 @@ tools = ["xtask"]
 [crates]
 vespera_core = { layer = 1, side = "shared" }
 vespera_content = { layer = 2, side = "shared" }
+vespera_motion = { layer = 2, side = "shared" }
 vespera_rules = { layer = 2, side = "shared" }
 vespera_protocol = { layer = 3, side = "shared" }
 vespera_client = { layer = 4, side = "client" }
