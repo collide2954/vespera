@@ -1,1 +1,6 @@
 tools = ["xtask"]
+
+[crates]
+vespera_client = { layer = 4, side = "client" }
+vespera_server = { layer = 4, side = "server" }
+vespera_testkit = { layer = 4, side = "test" }

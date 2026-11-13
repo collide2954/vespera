@@ -1,6 +1,11 @@
 [workspace]
 resolver = "3"
-members = ["xtask"]
+members = [
+    "crates/vespera_client",
+    "crates/vespera_server",
+    "crates/vespera_testkit",
+    "xtask",
+]
 
 [workspace.package]
 version = "0.1.0"
@@ -11,7 +16,17 @@ repository = "https://github.com/collide2954/vespera"
 publish = false
 
 [workspace.dependencies]
+vespera_client = { path = "crates/vespera_client" }
+vespera_server = { path = "crates/vespera_server" }
+
 anyhow = "1.0.104"
+bevy = { version = "0.20.1", default-features = false, features = [
+    "async_executor",
+    "bevy_state",
+    "multi_threaded",
+    "std",
+] }
+bevy_replicon = { version = "0.45.5", default-features = false }
 ra-ap-rustc_lexer = "0.184.0"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"

@@ -1,0 +1,17 @@
+[package]
+name = "vespera_testkit"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+bevy.workspace = true
+bevy_replicon = { workspace = true, features = ["client", "server"] }
+vespera_client.workspace = true
+vespera_server.workspace = true
+
+[lints]
+workspace = true
