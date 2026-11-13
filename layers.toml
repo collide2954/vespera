@@ -1,6 +1,7 @@
 tools = ["xtask"]
 
 [crates]
+vespera_rules = { layer = 2, side = "shared" }
 vespera_client = { layer = 4, side = "client" }
 vespera_server = { layer = 4, side = "server" }
 vespera_testkit = { layer = 4, side = "test" }

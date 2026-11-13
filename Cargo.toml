@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
     "crates/vespera_client",
+    "crates/vespera_rules",
     "crates/vespera_server",
     "crates/vespera_testkit",
     "xtask",

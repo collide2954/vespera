@@ -3182,6 +3182,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "vespera_rules"
+version = "0.1.0"
+
+[[package]]
 name = "vespera_server"
 version = "0.1.0"
 dependencies = [
