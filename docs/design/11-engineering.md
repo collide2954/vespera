@@ -70,7 +70,7 @@ GitHub Actions runs these jobs for each push to `main`:
 | Lint | Linux | clippy finds a warning. |
 | Test | Windows, Linux and macOS | A test fails. |
 | Database | Linux, with PostgreSQL | A persistence test fails on PostgreSQL. |
-| Coverage | Linux | The line coverage of the core crates is less than 90%. |
+| Coverage | Linux | The line coverage is less than 90%. The job measures all crates except the presentation crates. |
 | Dependencies | Linux | cargo-deny finds a bad license, a security advisory or a bad source. |
 | Text-only | Linux | The repository contains a binary file. |
 | Comments | Linux | A `//` or `/* */` comment is not in the allowlist, or an allowlist entry has no reason or matches no comment. |
@@ -81,7 +81,9 @@ GitHub Actions runs these jobs for each push to `main`:
 | Visual | Linux and Windows | A screenshot is different from its golden screenshot by more than the tolerance. |
 | Mutation | Linux, one time each week | The job does not fail. It reports each surviving mutant. |
 
-The core crates are `vespera_core`, `vespera_content`, `vespera_rules`, `vespera_motion`, `vespera_world`, `vespera_protocol`, `vespera_persistence` and `vespera_kinematics`.
+The presentation crates are `vespera_render`, `vespera_ui` and `vespera_audio`. Visual tests check these crates (see 11.3).
+
+Each job starts in the milestone that adds its subject. For example, the Database job starts with the first PostgreSQL store in M2. The Text-only, Comments, Layers and Documents checks run as steps of one job with the name Repository checks.
 
 The Documents job does only basic checks: the sentence length and a list of words that ASD-STE100 does not approve. The official ASD-STE100 dictionary is not part of the repository.
 
