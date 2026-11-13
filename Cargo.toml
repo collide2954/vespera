@@ -24,6 +24,7 @@ publish = false
 vespera_client = { path = "crates/vespera_client" }
 vespera_content = { path = "crates/vespera_content" }
 vespera_core = { path = "crates/vespera_core" }
+vespera_motion = { path = "crates/vespera_motion" }
 vespera_protocol = { path = "crates/vespera_protocol" }
 vespera_rules = { path = "crates/vespera_rules" }
 vespera_server = { path = "crates/vespera_server" }

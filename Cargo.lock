@@ -4585,6 +4585,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_replicon",
+ "vespera_motion",
  "vespera_protocol",
 ]
 
@@ -4625,6 +4626,7 @@ dependencies = [
  "bevy_replicon",
  "serde",
  "vespera_core",
+ "vespera_motion",
  "vespera_rules",
 ]
 
@@ -4646,6 +4648,7 @@ dependencies = [
  "bevy",
  "bevy_replicon",
  "vespera_core",
+ "vespera_motion",
  "vespera_protocol",
  "vespera_rules",
 ]
@@ -4659,6 +4662,7 @@ dependencies = [
  "vespera_client",
  "vespera_content",
  "vespera_core",
+ "vespera_motion",
  "vespera_protocol",
  "vespera_rules",
  "vespera_server",

@@ -1,10 +1,11 @@
 use bevy::prelude::*;
 use bevy_replicon::prelude::*;
 use vespera_core::Position;
-use vespera_protocol::{Character, Possess};
+use vespera_protocol::{Character, Possess, ServerMotion};
 use vespera_rules::pack::Pack;
 use vespera_rules::skills::Skills;
 
+use crate::movement::MoveQueue;
 use crate::privacy::PrivateTo;
 
 pub struct CharactersPlugin;
@@ -30,6 +31,8 @@ fn spawn_character(
             Replicated,
             Character,
             Position::default(),
+            ServerMotion::default(),
+            MoveQueue::default(),
             Pack::default(),
             Skills::default(),
             PrivateTo(client),

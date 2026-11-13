@@ -11,15 +11,16 @@ use bevy::state::app::StatesPlugin;
 use bevy::time::TimeUpdateStrategy;
 use bevy_replicon::prelude::*;
 use bevy_replicon::shared::server_entity_map::ServerEntityMap;
-use bevy_replicon::test_app::ServerTestAppExt;
-use vespera_client::{ClientLogicPlugins, LocalPlayer};
+use bevy_replicon::test_app::{ServerTestAppExt, TestClientEntity};
+use vespera_client::{ClientLogicPlugins, LocalMoveInput, LocalPlayer, Prediction};
 use vespera_content::{Content, ItemId, TreeId};
 use vespera_core::Position;
-use vespera_protocol::{Character, InteractIntent};
+use vespera_motion::MoveInput;
+use vespera_protocol::{Character, InteractIntent, MoveCommand, ServerMotion};
 use vespera_rules::pack::Pack;
 use vespera_rules::skills::{Skill, Skills};
 use vespera_rules::woodcutting::Tree;
-use vespera_server::ShardPlugins;
+use vespera_server::{Controls, ShardPlugins};
 
 pub const TICK: Duration = Duration::from_nanos(16_666_667);
 
@@ -124,6 +125,71 @@ impl TestShard {
         count::<With<Pack>>(self.client_app(client))
     }
 
+    pub fn set_input(&mut self, client: TestClient, direction: Vec2, sprint: bool) {
+        self.client_app(client)
+            .insert_resource(LocalMoveInput(MoveInput { direction, sprint }));
+    }
+
+    pub fn server_position(&mut self, client: TestClient) -> Vec3 {
+        let character = self.server_character(client);
+        self.server
+            .world()
+            .get::<Position>(character)
+            .expect("the character has a position")
+            .0
+    }
+
+    pub fn predicted_position(&mut self, client: TestClient) -> Vec3 {
+        self.local_player::<Prediction>(client)
+            .expect("the client predicts its character")
+            .position()
+    }
+
+    pub fn seen_position(&mut self, observer: TestClient, owner: TestClient) -> Vec3 {
+        let character = self.server_character(owner);
+        let local = self.wait_for_entity(observer, character);
+        self.client_app(observer)
+            .world()
+            .get::<Position>(local)
+            .expect("the observer sees the position")
+            .0
+    }
+
+    pub fn teleport(&mut self, client: TestClient, position: Vec3) {
+        let character = self.server_character(client);
+        let mut entity = self.server.world_mut().entity_mut(character);
+        entity.insert(Position(position));
+        if let Some(mut motion) = entity.get_mut::<ServerMotion>() {
+            motion.position = position;
+            motion.velocity = Vec3::ZERO;
+        }
+    }
+
+    pub fn flood_move_commands(
+        &mut self,
+        client: TestClient,
+        direction: Vec2,
+        commands_per_tick: u32,
+        duration: Duration,
+    ) {
+        let input = MoveInput {
+            direction,
+            sprint: false,
+        };
+        let mut sequence = 1_000_000;
+        let mut elapsed = Duration::ZERO;
+        while elapsed < duration {
+            for _ in 0..commands_per_tick {
+                sequence += 1;
+                self.client_app(client)
+                    .world_mut()
+                    .write_message(MoveCommand { sequence, input });
+            }
+            self.step();
+            elapsed += TICK;
+        }
+    }
+
     fn step(&mut self) {
         self.server.update();
         for client in &mut self.clients {
@@ -136,6 +202,18 @@ impl TestShard {
         self.clients
             .get_mut(client.0)
             .expect("the test client belongs to this shard")
+    }
+
+    fn server_character(&mut self, client: TestClient) -> Entity {
+        let client_entity = **self
+            .client_app(client)
+            .world()
+            .resource::<TestClientEntity>();
+        self.server
+            .world()
+            .get::<Controls>(client_entity)
+            .expect("the client controls a character")
+            .0
     }
 
     fn wait_for_entity(&mut self, client: TestClient, server_entity: Entity) -> Entity {

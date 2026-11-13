@@ -1,6 +1,7 @@
 use bevy::math::{Vec2, Vec3};
 use serde::{Deserialize, Serialize};
 
+pub const SIMULATION_HZ: f64 = 60.0;
 pub const RUN_SPEED: f32 = 5.4;
 pub const SPRINT_SPEED: f32 = 7.2;
 pub const ACCELERATION: f32 = 14.4;
