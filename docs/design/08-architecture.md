@@ -39,7 +39,7 @@ Later milestones add `vespera_login`, `vespera_social` and `vespera_exchange`.
 
 ## 8.3 Layer rules
 
-The crates have four layers. A crate can use only crates in lower layers.
+The crates have four layers. A crate can use crates in the same layer or in lower layers. Cargo prevents cycles.
 
 | Layer | Crates |
 |---|---|
@@ -53,10 +53,15 @@ The client crates are `vespera_client`, `vespera_render`, `vespera_ui`, `vespera
 More rules:
 
 - Server crates do not use client crates. Client crates do not use server crates.
+- Shared crates do not use server crates or client crates.
 - `vespera_testkit` is the only exception. It uses the server and the client logic plugins.
+- Only dev-dependencies can use a test crate. No crate can use a tool crate.
 - `vespera_persistence` is only for the server and the services.
 - Only `vespera_client`, `vespera_render`, `vespera_ui`, `vespera_audio` and `vespera_kinematics` use the render, window, audio and UI features of Bevy.
-- `cargo xtask check-layers` reads `cargo metadata`. It fails if a crate has a forbidden dependency.
+
+The file `layers.toml` gives the layer and the side of each crate. The sides are shared, server, client and test. The file also lists the tool crates, for example `xtask`.
+
+`cargo xtask check-layers` compares `cargo metadata` with `layers.toml`. It reads normal dependencies and build dependencies, but not dev-dependencies. It also fails if a crate has no entry or if an entry has no crate.
 
 The client library has two plugin groups:
 

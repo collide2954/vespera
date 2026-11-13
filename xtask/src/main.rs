@@ -2,6 +2,7 @@ mod command;
 mod comments;
 mod docs;
 mod finding;
+mod layers;
 mod repository;
 mod text_only;
 

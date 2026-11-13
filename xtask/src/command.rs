@@ -2,24 +2,31 @@ use anyhow::{Result, bail, ensure};
 
 use crate::comments::{self, Allowlist};
 use crate::finding::Finding;
-use crate::{docs, repository, text_only};
+use crate::{docs, layers, repository, text_only};
 
-const COMMANDS: &str = "check-text-only, check-comments, check-docs";
+const COMMANDS: &str = "check-text-only, check-comments, check-docs, check-layers";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Check {
     TextOnly,
     Comments,
     Docs,
+    Layers,
 }
 
 pub fn run(arguments: impl Iterator<Item = String>) -> Result<()> {
     let check = parse(arguments)?;
-    let files = repository::files(&repository::root())?;
+    let root = repository::root();
+    let files = repository::files(&root)?;
     let findings = match check {
         Check::TextOnly => text_only::check(&files),
         Check::Comments => comments::check(&files, &Allowlist::from_files(&files)?),
         Check::Docs => docs::check(&files),
+        Check::Layers => layers::check(
+            &root,
+            &layers::cargo_metadata(&root)?,
+            &layers::rules_text(&files)?,
+        )?,
     };
     report(&findings)
 }
@@ -32,6 +39,7 @@ fn parse(mut arguments: impl Iterator<Item = String>) -> Result<Check> {
         "check-text-only" => Check::TextOnly,
         "check-comments" => Check::Comments,
         "check-docs" => Check::Docs,
+        "check-layers" => Check::Layers,
         unknown => bail!("unknown command: {unknown}. Use one of these commands: {COMMANDS}"),
     };
     ensure!(
@@ -86,6 +94,11 @@ mod tests {
     #[test]
     fn check_docs_is_a_command() {
         assert_eq!(parse(arguments(&["check-docs"])).unwrap(), Check::Docs);
+    }
+
+    #[test]
+    fn check_layers_is_a_command() {
+        assert_eq!(parse(arguments(&["check-layers"])).unwrap(), Check::Layers);
     }
 
     #[test]
