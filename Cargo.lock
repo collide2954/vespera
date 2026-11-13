@@ -3182,6 +3182,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "vespera_content"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "ron",
+ "serde",
+ "thiserror 2.0.21",
+ "vespera_core",
+]
+
+[[package]]
 name = "vespera_core"
 version = "0.1.0"
 dependencies = [
