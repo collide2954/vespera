@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
     "crates/vespera_client",
+    "crates/vespera_core",
     "crates/vespera_rules",
     "crates/vespera_server",
     "crates/vespera_testkit",
@@ -18,6 +19,7 @@ publish = false
 
 [workspace.dependencies]
 vespera_client = { path = "crates/vespera_client" }
+vespera_core = { path = "crates/vespera_core" }
 vespera_server = { path = "crates/vespera_server" }
 
 anyhow = "1.0.104"
@@ -29,9 +31,11 @@ bevy = { version = "0.20.1", default-features = false, features = [
 ] }
 bevy_replicon = { version = "0.45.5", default-features = false }
 ra-ap-rustc_lexer = "0.184.0"
+ron = "0.12.3"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
 tempfile = "3.27.0"
+thiserror = "2.0.21"
 toml = "0.9.8"
 
 [workspace.lints.rust]
