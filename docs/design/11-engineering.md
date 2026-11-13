@@ -59,6 +59,8 @@ The workspace `Cargo.toml` sets the lints for all crates:
 |---|---|
 | `clippy::missing_errors_doc` | Rustdoc comments are optional (D28). This lint makes a rustdoc section necessary for each public function that returns a `Result`. |
 | `clippy::missing_panics_doc` | Rustdoc comments are optional (D28). This lint makes a rustdoc section necessary for each public function that can panic. |
+| `clippy::needless_pass_by_value` | Bevy systems receive their parameters, for example `Res` and `Query`, by value. |
+| `clippy::type_complexity` | Bevy queries with filters are long types by nature. A type alias for each query makes the systems harder to read. |
 
 ## 11.6 Continuous integration
 

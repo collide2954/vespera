@@ -29,6 +29,7 @@ bevy = { version = "0.20.1", default-features = false, features = [
     "async_executor",
     "bevy_state",
     "multi_threaded",
+    "serialize",
     "std",
 ] }
 bevy_replicon = { version = "0.45.5", default-features = false }
@@ -50,6 +51,8 @@ expect_used = "deny"
 unwrap_used = "deny"
 missing_errors_doc = "allow"
 missing_panics_doc = "allow"
+needless_pass_by_value = "allow"
+type_complexity = "allow"
 
 [profile.dev]
 opt-level = 1
