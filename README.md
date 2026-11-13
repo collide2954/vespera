@@ -6,7 +6,9 @@ Each day at dusk, the veil to the spirit world becomes thin. Spirits walk, rare 
 
 ## Status
 
-The project is in the design phase. No game code exists yet. Read the design in [docs/design](docs/design/README.md).
+Milestone M0 (foundations) is complete. The repository has the workspace, the repository checks, the CI gates and a test kit with a headless server and a headless client. Milestone M1, the living valley slice, comes next.
+
+Read the design in [docs/design](docs/design/README.md).
 
 ## Goals
 
