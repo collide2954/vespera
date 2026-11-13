@@ -2,40 +2,43 @@ use anyhow::{Result, bail, ensure};
 
 use crate::comments::{self, Allowlist};
 use crate::finding::Finding;
-use crate::{repository, text_only};
+use crate::{docs, repository, text_only};
 
-const COMMANDS: &str = "check-text-only, check-comments";
+const COMMANDS: &str = "check-text-only, check-comments, check-docs";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum Command {
-    CheckTextOnly,
-    CheckComments,
+enum Check {
+    TextOnly,
+    Comments,
+    Docs,
 }
 
 pub fn run(arguments: impl Iterator<Item = String>) -> Result<()> {
-    let command = parse(arguments)?;
+    let check = parse(arguments)?;
     let files = repository::files(&repository::root())?;
-    let findings = match command {
-        Command::CheckTextOnly => text_only::check(&files),
-        Command::CheckComments => comments::check(&files, &Allowlist::from_files(&files)?),
+    let findings = match check {
+        Check::TextOnly => text_only::check(&files),
+        Check::Comments => comments::check(&files, &Allowlist::from_files(&files)?),
+        Check::Docs => docs::check(&files),
     };
     report(&findings)
 }
 
-fn parse(mut arguments: impl Iterator<Item = String>) -> Result<Command> {
+fn parse(mut arguments: impl Iterator<Item = String>) -> Result<Check> {
     let Some(name) = arguments.next() else {
         bail!("no command. Use one of these commands: {COMMANDS}");
     };
-    let command = match name.as_str() {
-        "check-text-only" => Command::CheckTextOnly,
-        "check-comments" => Command::CheckComments,
+    let check = match name.as_str() {
+        "check-text-only" => Check::TextOnly,
+        "check-comments" => Check::Comments,
+        "check-docs" => Check::Docs,
         unknown => bail!("unknown command: {unknown}. Use one of these commands: {COMMANDS}"),
     };
     ensure!(
         arguments.next().is_none(),
         "the command {name} takes no arguments"
     );
-    Ok(command)
+    Ok(check)
 }
 
 fn report(findings: &[Finding]) -> Result<()> {
@@ -53,7 +56,7 @@ fn report(findings: &[Finding]) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::{Command, parse, report};
+    use super::{Check, parse, report};
     use crate::finding::Finding;
 
     fn arguments(values: &[&str]) -> impl Iterator<Item = String> {
@@ -68,7 +71,7 @@ mod tests {
     fn check_text_only_is_a_command() {
         assert_eq!(
             parse(arguments(&["check-text-only"])).unwrap(),
-            Command::CheckTextOnly
+            Check::TextOnly
         );
     }
 
@@ -76,8 +79,13 @@ mod tests {
     fn check_comments_is_a_command() {
         assert_eq!(
             parse(arguments(&["check-comments"])).unwrap(),
-            Command::CheckComments
+            Check::Comments
         );
+    }
+
+    #[test]
+    fn check_docs_is_a_command() {
+        assert_eq!(parse(arguments(&["check-docs"])).unwrap(), Check::Docs);
     }
 
     #[test]

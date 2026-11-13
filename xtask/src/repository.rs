@@ -10,6 +10,19 @@ pub struct RepositoryFile {
     pub bytes: Vec<u8>,
 }
 
+impl RepositoryFile {
+    pub fn has_extension(&self, extensions: &[&str]) -> bool {
+        Path::new(&self.path)
+            .extension()
+            .and_then(|extension| extension.to_str())
+            .is_some_and(|extension| {
+                extensions
+                    .iter()
+                    .any(|wanted| extension.eq_ignore_ascii_case(wanted))
+            })
+    }
+}
+
 pub fn root() -> PathBuf {
     let manifest_directory = Path::new(env!("CARGO_MANIFEST_DIR"));
     manifest_directory
@@ -65,7 +78,7 @@ mod tests {
     use std::path::Path;
     use std::process::Command;
 
-    use super::{files, root};
+    use super::{RepositoryFile, files, root};
 
     fn git(directory: &Path, arguments: &[&str]) {
         let status = Command::new("git")
@@ -83,6 +96,27 @@ mod tests {
             fs::write(directory.path().join(path), contents).unwrap();
         }
         directory
+    }
+
+    #[test]
+    fn extensions_match_without_case() {
+        let file = RepositoryFile {
+            path: "docs/README.MD".to_owned(),
+            bytes: Vec::new(),
+        };
+
+        assert!(file.has_extension(&["md"]));
+        assert!(!file.has_extension(&["rs", "wesl"]));
+    }
+
+    #[test]
+    fn a_file_without_an_extension_matches_no_extension() {
+        let file = RepositoryFile {
+            path: "LICENSE".to_owned(),
+            bytes: Vec::new(),
+        };
+
+        assert!(!file.has_extension(&["md"]));
     }
 
     #[test]

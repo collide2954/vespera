@@ -1,5 +1,6 @@
 mod command;
 mod comments;
+mod docs;
 mod finding;
 mod repository;
 mod text_only;

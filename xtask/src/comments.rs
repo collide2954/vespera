@@ -89,10 +89,12 @@ fn comments_in(file: &RepositoryFile) -> Vec<Comment> {
     let Ok(source) = std::str::from_utf8(&file.bytes) else {
         return Vec::new();
     };
-    match file.path.rsplit_once('.').map(|(_, extension)| extension) {
-        Some("rs") => rust_comments(source),
-        Some("wesl" | "wgsl") => shader_comments(source),
-        _ => Vec::new(),
+    if file.has_extension(&["rs"]) {
+        rust_comments(source)
+    } else if file.has_extension(&["wesl", "wgsl"]) {
+        shader_comments(source)
+    } else {
+        Vec::new()
     }
 }
 

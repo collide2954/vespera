@@ -98,6 +98,7 @@ The Documents job does only basic checks: the sentence length and a list of word
 
 - Write all documentation in ASD-STE100: Markdown files, commit messages, issue text, rustdoc and the changelog.
 - Keep sentences short: 20 words or less for instructions, and 25 words or less for descriptions.
+- Write each paragraph, each list item and each table row on one line. The Documents check reads each line separately.
 - Use the active voice and simple tenses.
 - Use one word for one meaning.
 - Use technical names for game and software concepts, for example "shard", "chunk" and "order book".
