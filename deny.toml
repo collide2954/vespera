@@ -7,7 +7,7 @@ yanked = "deny"
 
 [licenses]
 version = 2
-allow = ["Apache-2.0", "BSL-1.0", "ISC", "MIT", "MIT-0", "Unicode-3.0", "Zlib"]
+allow = ["Apache-2.0", "BSL-1.0", "MIT", "Unicode-3.0", "Zlib"]
 confidence-threshold = 0.93
 
 [licenses.private]
