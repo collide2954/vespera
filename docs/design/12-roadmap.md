@@ -4,14 +4,15 @@ Each milestone has goals and acceptance criteria. Where possible, acceptance tes
 
 ## 12.1 M0: Foundations
 
+M0 makes only the parts that its tests use. Each other crate, file and tool comes in a later milestone, together with its first test that fails.
+
 Goals:
 
-- A Cargo workspace with all crates from 8.2, as empty skeletons.
-- The files `rust-toolchain.toml`, `deny.toml`, `typos.toml`, `rustfmt.toml` and `comment-allowlist.toml`, and the workspace lints.
-- The xtask commands `check-comments`, `check-layers`, `check-text-only`, `check-docs` and `fetch-assets`.
+- A Cargo workspace with the `vespera_server`, `vespera_client`, `vespera_testkit` and `xtask` crates.
+- The pinned toolchain, the workspace lints and the configuration files for the tools.
+- The xtask commands `check-text-only`, `check-comments`, `check-docs` and `check-layers`.
 - `vespera_testkit` with a headless server and a headless client in one process.
-- All CI jobs from 11.6 that apply to empty crates.
-- The `vespera-assets` repository with a first empty release.
+- The CI jobs from 11.6 that apply to these crates.
 
 Acceptance criteria:
 
@@ -32,6 +33,7 @@ Goals:
 - The Woodcutting skill. The player cuts a tree and receives logs and XP. The tree falls, and later it grows again.
 - A pack with 28 slots.
 - The benchmark from 9.7.
+- The `vespera-assets` repository, the `assets.toml` manifest and the `fetch-assets` command.
 
 Acceptance criteria:
 
