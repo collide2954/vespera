@@ -1,8 +1,14 @@
 use bevy::app::PluginGroupBuilder;
 use bevy::prelude::*;
 use bevy_replicon::prelude::*;
+use vespera_protocol::{Possess, ProtocolPlugin};
 
 pub struct ClientLogicPlugins;
+
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct LocalPlayer;
+
+struct PossessionPlugin;
 
 impl PluginGroup for ClientLogicPlugins {
     fn build(self) -> PluginGroupBuilder {
@@ -10,5 +16,24 @@ impl PluginGroup for ClientLogicPlugins {
             .add(RepliconSharedPlugin::default())
             .add(ClientPlugin)
             .add(ClientMessagePlugin)
+            .add(ProtocolPlugin)
+            .add(PossessionPlugin)
+    }
+}
+
+impl Plugin for PossessionPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(
+            PreUpdate,
+            possess
+                .after(ClientSystems::Receive)
+                .run_if(in_state(ClientState::Connected)),
+        );
+    }
+}
+
+fn possess(mut possessions: MessageReader<Possess>, mut commands: Commands) {
+    for possession in possessions.read() {
+        commands.entity(possession.character).insert(LocalPlayer);
     }
 }

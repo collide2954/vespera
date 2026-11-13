@@ -4585,6 +4585,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_replicon",
+ "vespera_protocol",
 ]
 
 [[package]]
@@ -4609,6 +4610,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "vespera_protocol"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_replicon",
+ "serde",
+ "vespera_core",
+ "vespera_rules",
+]
+
+[[package]]
 name = "vespera_rules"
 version = "0.1.0"
 dependencies = [
@@ -4625,6 +4637,9 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_replicon",
+ "vespera_core",
+ "vespera_protocol",
+ "vespera_rules",
 ]
 
 [[package]]
@@ -4634,6 +4649,10 @@ dependencies = [
  "bevy",
  "bevy_replicon",
  "vespera_client",
+ "vespera_content",
+ "vespera_core",
+ "vespera_protocol",
+ "vespera_rules",
  "vespera_server",
 ]
 
