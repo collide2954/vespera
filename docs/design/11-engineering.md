@@ -53,7 +53,12 @@ The workspace `Cargo.toml` sets the lints for all crates:
 - `unsafe_code` is forbidden.
 - `clippy::all` and `clippy::pedantic` are errors in CI.
 - `clippy::unwrap_used` and `clippy::expect_used` are errors outside tests.
-- Some pedantic lints conflict with Bevy patterns. A short list of these lints are exceptions. For example, `needless_pass_by_value` conflicts with system parameters. The workspace `Cargo.toml` gives the reason for each exception.
+- Some lints do not agree with the project rules or with Bevy patterns. These lints are exceptions. The configuration files contain no comments. Thus the table below gives the reason for each exception.
+
+| Lint | Reason |
+|---|---|
+| `clippy::missing_errors_doc` | Rustdoc comments are optional (D28). This lint makes a rustdoc section necessary for each public function that returns a `Result`. |
+| `clippy::missing_panics_doc` | Rustdoc comments are optional (D28). This lint makes a rustdoc section necessary for each public function that can panic. |
 
 ## 11.6 Continuous integration
 
