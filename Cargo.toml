@@ -20,6 +20,7 @@ publish = false
 
 [workspace.dependencies]
 vespera_client = { path = "crates/vespera_client" }
+vespera_content = { path = "crates/vespera_content" }
 vespera_core = { path = "crates/vespera_core" }
 vespera_server = { path = "crates/vespera_server" }
 
