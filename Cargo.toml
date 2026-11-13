@@ -12,7 +12,10 @@ publish = false
 
 [workspace.dependencies]
 anyhow = "1.0.104"
+ra-ap-rustc_lexer = "0.184.0"
+serde = { version = "1.0.229", features = ["derive"] }
 tempfile = "3.27.0"
+toml = "0.9.8"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

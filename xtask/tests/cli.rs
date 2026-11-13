@@ -20,6 +20,18 @@ fn check_text_only_passes_on_this_repository() -> io::Result<()> {
 }
 
 #[test]
+fn check_comments_passes_on_this_repository() -> io::Result<()> {
+    let output = xtask(&["check-comments"])?;
+
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    Ok(())
+}
+
+#[test]
 fn an_unknown_command_fails_with_a_message() -> io::Result<()> {
     let output = xtask(&["fly"])?;
 

@@ -73,7 +73,7 @@ GitHub Actions runs these jobs for each push to `main`:
 | Coverage | Linux | The line coverage of the core crates is less than 90%. |
 | Dependencies | Linux | cargo-deny finds a bad license, a security advisory or a bad source. |
 | Text-only | Linux | The repository contains a binary file. |
-| Comments | Linux | A `//` or `/* */` comment is not in the allowlist. |
+| Comments | Linux | A `//` or `/* */` comment is not in the allowlist, or an allowlist entry has no reason or matches no comment. |
 | Layers | Linux | A crate has a forbidden dependency. |
 | Spelling | Linux | typos finds a spelling error. |
 | Documents | Linux | A Markdown file breaks a basic ASD-STE100 rule. |

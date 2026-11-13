@@ -1,13 +1,15 @@
 use anyhow::{Result, bail, ensure};
 
+use crate::comments::{self, Allowlist};
 use crate::finding::Finding;
 use crate::{repository, text_only};
 
-const COMMANDS: &str = "check-text-only";
+const COMMANDS: &str = "check-text-only, check-comments";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Command {
     CheckTextOnly,
+    CheckComments,
 }
 
 pub fn run(arguments: impl Iterator<Item = String>) -> Result<()> {
@@ -15,6 +17,7 @@ pub fn run(arguments: impl Iterator<Item = String>) -> Result<()> {
     let files = repository::files(&repository::root())?;
     let findings = match command {
         Command::CheckTextOnly => text_only::check(&files),
+        Command::CheckComments => comments::check(&files, &Allowlist::from_files(&files)?),
     };
     report(&findings)
 }
@@ -25,6 +28,7 @@ fn parse(mut arguments: impl Iterator<Item = String>) -> Result<Command> {
     };
     let command = match name.as_str() {
         "check-text-only" => Command::CheckTextOnly,
+        "check-comments" => Command::CheckComments,
         unknown => bail!("unknown command: {unknown}. Use one of these commands: {COMMANDS}"),
     };
     ensure!(
@@ -65,6 +69,14 @@ mod tests {
         assert_eq!(
             parse(arguments(&["check-text-only"])).unwrap(),
             Command::CheckTextOnly
+        );
+    }
+
+    #[test]
+    fn check_comments_is_a_command() {
+        assert_eq!(
+            parse(arguments(&["check-comments"])).unwrap(),
+            Command::CheckComments
         );
     }
 
