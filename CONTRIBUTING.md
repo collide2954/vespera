@@ -16,8 +16,7 @@ This file gives the rules for all changes to Vespera. The full rules are in [doc
 
 Do these steps:
 
-1. Run the formatter.
-2. Run the linter.
-3. Run all tests.
-
-Milestone M0 adds the commands for these steps.
+1. Run the formatter: `cargo fmt --all`.
+2. Run the linter: `cargo clippy --workspace --all-targets`.
+3. Run all tests: `cargo test --workspace`.
+4. Run the repository checks: `cargo xtask check-text-only`, `cargo xtask check-comments`, `cargo xtask check-docs` and `cargo xtask check-layers`.
