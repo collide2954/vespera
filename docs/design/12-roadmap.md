@@ -26,8 +26,8 @@ Goals:
 - The world compiler makes a valley of 1 km × 1 km from layer maps.
 - Terrain chunks stream around the camera.
 - The sky, the sun, the moon, the day and night cycle, and the Vesper Hour effects.
-- Grass, trees and rocks from the Stylized Nature MegaKit, with wind.
-- One player character with locomotion, foot IK, look-at and spring bones.
+- Grass, rocks and plants from CC0 scans, and trees from the tree generator, with wind.
+- One MakeHuman player character with motion capture locomotion, foot IK, look-at and spring bones.
 - The hybrid controls and the orbit camera.
 - Client prediction against a local server through renet.
 - The Woodcutting skill. The player cuts a tree and receives logs and XP. The tree falls, and later it grows again.
@@ -139,10 +139,12 @@ Acceptance criteria:
 | No. | Question | Default |
 |---|---|---|
 | 1 | Which source for the music: CC0 or CC-BY-4.0 libraries, a composer, or both? | None |
-| 2 | Which CC0 creature packs agree with the art style? | Test the Quaternius animal packs first. |
+| 2 | Which CC0 or CC-BY-4.0 creature assets agree with the semi-realistic style? | Search Sketchfab for CC0 and CC-BY-4.0 animals first. |
 | 3 | What are the details of the Frontier death rules? | The rules in 7.5. |
 | 4 | Which protocol do the internal services use? | Decide in M3. |
 | 5 | Is 4 players the correct party size? | 4 players |
 | 6 | Is 96 minutes the correct length for a day cycle? | 96 minutes |
 | 7 | What are the combat values: damage, health, energy and recharge times? | Decide in M4. |
 | 8 | What is the gamepad layout? | Decide in M8. |
+| 9 | Which tool generates the trees? | Test the free tree add-ons for Blender first. |
+| 10 | Which sources give medieval buildings, weapons and fantasy outfits in the semi-realistic style? | Poly Haven props, and buildings made from ambientCG materials. |

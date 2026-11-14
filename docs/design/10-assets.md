@@ -2,33 +2,36 @@
 
 ## 10.1 Art direction
 
-The look is stylized low-poly with soft, rich light. Shapes are simple and easy to read. Light, fog and color make the mystical mood.
+The look is semi-realistic, with a light fantasy finish. Bodies have real human proportions, and materials come from photo scans. Light, fog and color make the mystical mood.
 
 | Element | Rule |
 |---|---|
-| Shapes | Chunky silhouettes. Shapes stay clear at a distance. |
-| Materials | Mostly flat colors and small gradient textures. No photo textures. |
-| Palette | Dusk violet, ember orange, moss green, river blue and starlight cyan. Each region has a variation of the palette. |
+| Shapes | Real proportions. Silhouettes stay clear at a distance. |
+| Materials | Physically based materials (PBR) from photo scans: base color, normal, roughness and occlusion. A light color grade gives the fantasy finish. |
+| Palette | Dusk violet, ember orange, moss green, river blue and starlight cyan. Each region has a variation of the palette. The palette controls the light and the color grade, not the textures. |
 | Light | By day, a warm sun and cool shadows. At dusk, deep violet and cyan. At night, strong contrast between light sources and dark areas. |
 | Atmosphere | Layers of fog, light shafts, floating motes, fireflies and plants that glow. |
 | Motion | Wind moves grass, leaves, cloth and water at all times. |
 
 ## 10.2 Sources
 
-The main source is the CC0 asset family by Quaternius. These packs share one style, and the character packs share one rig.
+All sources use CC0 or CC-BY-4.0 (see 10.3). Vespera lighting, fog, color grading and wind unify the assets.
 
-| Pack | Use |
-|---|---|
-| Universal Base Characters | Base bodies and heads |
-| Universal Animation Library 1 and 2 | Humanoid animation clips |
-| Modular Character Outfits – Fantasy | Outfits |
-| Medieval Village MegaKit | Buildings and village parts |
-| Fantasy Props MegaKit | Props, tools and weapons |
-| Stylized Nature MegaKit | Trees, plants and rocks |
+| Source | License | Use |
+|---|---|---|
+| MakeHuman and MPFB | CC0 | Human bodies, the morph targets for customization, and the human rig |
+| MakeHuman asset packs | CC0 or CC-BY-4.0 | Clothes, hair, eyes and skin materials |
+| 100STYLE motion capture data | CC-BY-4.0 | Locomotion clips: walk, run, sidestep, idle and transitions, in 100 styles |
+| Universal Animation Library 1 and 2 (Quaternius) | CC0 | Action clips, for example gather actions, craft actions and attacks |
+| Poly Haven | CC0 | Scanned rocks, plants, ground cover and props |
+| ambientCG | CC0 | Scanned materials for terrain, bark, leaves, stone and wood |
+| A tree generator | CC0 output | Trees from CC0 bark and leaf textures. Each tree fits the triangle budget, with LOD meshes and impostors. |
 
-The project uses only the free tiers of these packs. Other CC0 or CC-BY-4.0 sources, and small edits in Blender, fill the gaps. All additions must follow the style rules in 10.4.
+The scanned trees of Poly Haven are not game assets. Each one has between 0.15 and 17 million triangles. Thus a tree generator makes the trees.
 
-Creature assets for wildlife and tamed creatures are an open question (see 12.10).
+The project uses only free sources and the free tiers of asset packs. Other CC0 or CC-BY-4.0 sources, and small edits in Blender, fill the gaps. All additions must follow the style rules in 10.4.
+
+The sources for creatures, medieval buildings, weapons and fantasy outfits are open questions (see 12.10).
 
 ## 10.3 License rules
 
@@ -49,9 +52,9 @@ Each asset has a license record with its source URL, its author, its license and
 | Axes | +Y is up and −Z is forward (Bevy convention). The import step converts the axes of glTF files. |
 | Pivot | At the base of the object, at ground level. |
 | Triangle budget | Player character 15,000. NPC 8,000. Creature 6,000. Prop 1,500. Tree 5,000 at LOD 0. Building 10,000. |
-| Texture size | 1024 × 1024 or less. Most props use a shared palette texture. |
-| Materials | Only the Vespera stylized material. |
-| Rigs | Each humanoid uses the universal humanoid rig (see chapter 4). |
+| Texture size | 2048 × 2048 or less in the source files. The Low preset loads 1024 × 1024 or less (see 9.5). |
+| Materials | Only the Vespera material: physically based, with the color grade of the region. |
+| Rigs | Each human uses the Vespera human rig, from MakeHuman (see chapter 4). |
 | Names | Lowercase snake case for files and nodes, for example `tree_oak_large_01`. |
 
 ## 10.5 Asset store
@@ -71,7 +74,8 @@ The git repository is text-only. All binary files are in the asset store.
 2. Import. `cargo xtask import-assets` does these steps:
    - It converts the axes and the scale.
    - It gives the bones their Vespera joint names.
-   - It applies the palette and the tint masks.
+   - It retargets all animation clips to the Vespera human rig.
+   - It applies the tint masks.
    - It makes LOD meshes with meshoptimizer.
    - It compresses the textures to BCn with mipmaps.
 3. Runtime bundle. The import step writes the processed files to a runtime archive. The client and the server load only runtime files.

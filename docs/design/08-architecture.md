@@ -28,7 +28,7 @@ The repository is one Cargo workspace. Each crate has one purpose.
 | `vespera_persistence` | Library | Store traits, and the SQLite and PostgreSQL stores |
 | `vespera_server` | Library and binary | The world shard server |
 | `vespera_kinematics` | Library | IK solvers, spring bones, the animation graph and the procedural layers |
-| `vespera_render` | Library | The stylized material, terrain, sky, fog, foliage, post-processing, quality presets and the dynamic render scale |
+| `vespera_render` | Library | The Vespera material, terrain, sky, fog, foliage, post-processing, quality presets and the dynamic render scale |
 | `vespera_ui` | Library | The widget set and the game screens |
 | `vespera_audio` | Library | Spatial audio, ambience and music |
 | `vespera_client` | Library | The client logic: the connection, prediction and input state |

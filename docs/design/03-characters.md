@@ -15,20 +15,20 @@ The origin sets the start outfit, the name suggestions, the voice set and a stor
 
 ## 3.2 Customization
 
-All humans use one shared rig, the universal humanoid rig from Quaternius. Thus each outfit and each animation fits each character.
+All humans use one shared rig, the Vespera human rig from MakeHuman. Thus each outfit and each animation fits each character.
 
 The player can change these properties:
 
-- Body type: two base bodies from Universal Base Characters.
+- Body shape: sliders from the MakeHuman morph targets, for example the proportions, the age and the weight.
 - Build: a slider from slim to strong.
 - Height: up to 6% more or less than the base height.
-- Face shape, from a set of presets.
+- Face shape: presets, and sliders from the MakeHuman morph targets.
 - Hair style and hair color.
 - Skin tone and eye color.
 - Starlight markings: patterns on the skin that glow more during the Vesper Hour.
 - Voice set.
 
-The build slider and some faces use morph targets that the source packs do not contain. Small edits in Blender make these morph targets. The edits keep the topology of the source meshes.
+MakeHuman contains the morph targets for the body, the build and the face. The client bakes the selected shape into the mesh when the character loads. Thus the shape has no cost in each frame.
 
 ## 3.3 Equipment
 
@@ -41,7 +41,7 @@ Equipment is visible on the character.
 | Main hand, off hand | Yes |
 | Neck, two rings | No |
 
-Outfits come from the free parts of Modular Character Outfits – Fantasy. A tint mask gives each outfit part up to three color channels. Dyes change these channels. Thus a small number of meshes gives many different looks.
+Outfits come from the MakeHuman asset packs and from other CC0 or CC-BY-4.0 sources (see 10.2). A tint mask gives each outfit part up to three color channels. Dyes change these channels. Thus a small number of meshes gives many different looks.
 
 ## 3.4 Companions
 

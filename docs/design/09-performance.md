@@ -58,7 +58,7 @@ The GPU budget has a total of 14 ms. The remaining 2.7 ms is a reserve.
 
 ## 9.5 Render rules for the Low preset
 
-- Use Bevy forward rendering with the Vespera stylized material. The material uses few texture samples and a simple light model.
+- Use Bevy forward rendering with the Vespera material. On Low, the material uses few texture samples and a simple light model.
 - Do not use MSAA. Use SMAA or FXAA, then contrast adaptive sharpening (CAS).
 - Render the 3D scene at the dynamic render scale. Render the UI at the full output resolution.
 - Use 2 shadow cascades at 1024 × 1024. Contact shadows are off.

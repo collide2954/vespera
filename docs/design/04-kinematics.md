@@ -15,7 +15,7 @@ Bodies must move with weight, balance and intent. These rules apply to all chara
 
 | Rig | Users |
 |---|---|
-| Universal humanoid rig (Quaternius) | All humans: players, NPCs and humanoid followers |
+| Vespera human rig (from MakeHuman) | All humans: players, NPCs and humanoid followers |
 | Quadruped rig | Four-legged animals and tamed creatures |
 | Bird rig | Birds |
 | Spirit rig | Spirits. The rig has few bones. Shaders and particles make most of the motion. |
@@ -35,7 +35,7 @@ The client makes the pose of each character from six layers. Each layer changes 
 | 5 | Secondary motion | Spring bones for hair, capes, straps, tails and ears. |
 | 6 | Reactions | Hit flinches in the direction of the hit, stagger and knockdown. A cosmetic ragdoll on death. |
 
-The clips come from Universal Animation Library 1 and 2 (free parts). All clips use the universal humanoid rig.
+Locomotion clips come from the 100STYLE motion capture data. Action clips, and locomotion clips that 100STYLE does not contain, come from Universal Animation Library 1 and 2 (free parts). The import step retargets all clips to the Vespera human rig.
 
 ## 4.4 Locomotion
 

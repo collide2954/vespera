@@ -34,7 +34,7 @@ This folder contains the design of Vespera. The design has two parts:
 |---|---|---|---|
 | D01 | Engine and language | Rust edition 2024 and Bevy (0.20 at the start). | 11.1 |
 | D02 | License | Apache-2.0 for the code. | [LICENSE](../../LICENSE) |
-| D03 | Art direction | Stylized low-poly. The Quaternius CC0 asset family, unified by Vespera lighting, fog, color grading and wind. | 10.1 |
+| D03 | Art direction | Semi-realistic: real human proportions, PBR materials from photo scans and natural light, with a light fantasy finish. Vespera lighting, fog, color grading and wind unify the assets. | 10.1 |
 | D04 | Lore hook | The Vesper Hour. A full day and night cycle. At dusk, the veil to the spirit world becomes thin for a short time. | 1.4 |
 | D05 | Controls | Hybrid: WASD or click-to-move, a third-person orbit camera, and targets by click or Tab. | 3.5 |
 | D06 | Combat | Guild Wars style builds: tab-target, an 8-slot skill bar from a large pool, and telegraphed attacks. | 5.4 |
@@ -68,3 +68,6 @@ This folder contains the design of Vespera. The design has two parts:
 | D34 | Asset licenses | CC0-1.0 and CC-BY-4.0. OFL-1.1 only for fonts. | 10.3 |
 | D35 | Asset tiers | Only the free tiers of asset packs. | 10.2 |
 | D36 | First milestone | The living valley slice. | 12.2 |
+| D37 | Human models | MakeHuman and MPFB: CC0 bodies, morph targets and the human rig. | 10.2 |
+| D38 | Animation sources | The 100STYLE motion capture data (CC-BY-4.0) for locomotion. Universal Animation Library clips (CC0) for actions. | 4.3 |
+| D39 | Nature sources | Poly Haven and ambientCG scans (CC0) for rocks, plants and materials. A tree generator makes the trees. | 10.2 |
