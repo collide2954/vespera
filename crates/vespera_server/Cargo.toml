@@ -12,6 +12,7 @@ name = "vespera-server"
 path = "src/main.rs"
 
 [dependencies]
+anyhow.workspace = true
 bevy = { workspace = true, features = ["bevy_log"] }
 bevy_replicon = { workspace = true, features = ["server"] }
 bevy_replicon_renet = { workspace = true, features = ["server"] }

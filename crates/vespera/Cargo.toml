@@ -8,6 +8,7 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+anyhow.workspace = true
 bevy = { workspace = true, features = ["3d"] }
 bevy_replicon_renet = { workspace = true, features = ["client"] }
 vespera_client.workspace = true
