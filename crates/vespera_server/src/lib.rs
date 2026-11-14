@@ -1,5 +1,6 @@
 mod characters;
 mod intents;
+mod landmarks;
 mod movement;
 mod privacy;
 mod transport;
@@ -26,6 +27,7 @@ impl PluginGroup for ShardPlugins {
             .add(characters::CharactersPlugin)
             .add(intents::IntentsPlugin)
             .add(movement::MovementPlugin)
+            .add(landmarks::LandmarksPlugin)
             .add(WoodcuttingPlugin)
     }
 }

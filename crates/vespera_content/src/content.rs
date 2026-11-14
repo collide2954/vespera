@@ -102,14 +102,14 @@ impl TreeDefinition {
     }
 }
 
-fn read(path: &Path) -> Result<String, ContentError> {
+pub(crate) fn read(path: &Path) -> Result<String, ContentError> {
     fs::read_to_string(path).map_err(|source| ContentError::Read {
         path: path.to_path_buf(),
         source,
     })
 }
 
-fn parse<T: DeserializeOwned>(file: &str, source: &str) -> Result<T, ContentError> {
+pub(crate) fn parse<T: DeserializeOwned>(file: &str, source: &str) -> Result<T, ContentError> {
     ron::from_str(source).map_err(|source| ContentError::Parse {
         file: file.to_owned(),
         source: Box::new(source),

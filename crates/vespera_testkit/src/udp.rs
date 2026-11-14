@@ -9,7 +9,7 @@ use vespera_client::{ClientLogicPlugins, LocalPlayer};
 use vespera_protocol::Character;
 use vespera_server::ShardPlugins;
 
-use crate::repository_content;
+use crate::repository_world;
 
 const POLL_INTERVAL: Duration = Duration::from_millis(2);
 
@@ -21,6 +21,7 @@ pub struct UdpTestShard {
 impl UdpTestShard {
     #[must_use]
     pub fn new() -> Self {
+        let (content, landmarks) = repository_world();
         let mut server = App::new();
         server
             .add_plugins((
@@ -29,7 +30,8 @@ impl UdpTestShard {
                 ShardPlugins,
                 RepliconRenetServerPlugin,
             ))
-            .insert_resource(repository_content());
+            .insert_resource(content)
+            .insert_resource(landmarks);
         server.finish();
         let address =
             vespera_server::listen(&mut server, SocketAddr::from((Ipv4Addr::LOCALHOST, 0)))

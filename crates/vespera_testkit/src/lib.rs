@@ -15,7 +15,7 @@ use bevy_replicon::prelude::*;
 use bevy_replicon::shared::server_entity_map::ServerEntityMap;
 use bevy_replicon::test_app::{ServerTestAppExt, TestClientEntity};
 use vespera_client::{ClientLogicPlugins, LocalMoveInput, LocalPlayer, Prediction};
-use vespera_content::{Content, ItemId, TreeId};
+use vespera_content::{Content, ItemId, Landmarks, TreeId};
 use vespera_core::Position;
 use vespera_motion::MoveInput;
 use vespera_protocol::{Character, InteractIntent, MoveCommand, ServerMotion};
@@ -41,6 +41,7 @@ pub struct TestShard {
 impl TestShard {
     #[must_use]
     pub fn new() -> Self {
+        let (content, landmarks) = repository_world();
         let mut server = App::new();
         server
             .add_plugins((
@@ -48,7 +49,8 @@ impl TestShard {
                 StatesPlugin,
                 ShardPlugins.set(ServerPlugin::new(PostUpdate)),
             ))
-            .insert_resource(repository_content());
+            .insert_resource(content)
+            .insert_resource(landmarks);
         use_fixed_ticks(&mut server);
         server.finish();
         Self {
@@ -60,6 +62,11 @@ impl TestShard {
     #[must_use]
     pub fn content(&self) -> &Content {
         self.server.world().resource::<Content>()
+    }
+
+    #[must_use]
+    pub fn landmark_count(&self) -> usize {
+        self.server.world().resource::<Landmarks>().trees().len()
     }
 
     pub fn connect_client(&mut self) -> TestClient {
@@ -125,6 +132,10 @@ impl TestShard {
 
     pub fn visible_packs(&mut self, client: TestClient) -> usize {
         count::<With<Pack>>(self.client_app(client))
+    }
+
+    pub fn visible_trees(&mut self, client: TestClient) -> usize {
+        count::<With<Tree>>(self.client_app(client))
     }
 
     pub fn set_input(&mut self, client: TestClient, direction: Vec2, sprint: bool) {
@@ -248,9 +259,12 @@ impl Default for TestShard {
     }
 }
 
-fn repository_content() -> Content {
-    Content::load(&Path::new(env!("CARGO_MANIFEST_DIR")).join("../../content"))
-        .expect("the repository content is valid")
+fn repository_world() -> (Content, Landmarks) {
+    let directory = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../content");
+    let content = Content::load(&directory).expect("the repository content is valid");
+    let landmarks =
+        Landmarks::load(&directory, &content).expect("the repository landmarks are valid");
+    (content, landmarks)
 }
 
 fn use_fixed_ticks(app: &mut App) {

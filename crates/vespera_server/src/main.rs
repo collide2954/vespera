@@ -9,7 +9,7 @@ use bevy::log::LogPlugin;
 use bevy::prelude::*;
 use bevy::state::app::StatesPlugin;
 use bevy_replicon_renet::RepliconRenetServerPlugin;
-use vespera_content::Content;
+use vespera_content::{Content, Landmarks};
 use vespera_motion::SIMULATION_HZ;
 use vespera_server::{ShardPlugins, listen};
 
@@ -33,6 +33,7 @@ fn run() -> Result<AppExit, Box<dyn Error>> {
     let content_directory = env::var_os("VESPERA_CONTENT")
         .map_or_else(|| PathBuf::from(DEFAULT_CONTENT_DIRECTORY), PathBuf::from);
     let content = Content::load(&content_directory)?;
+    let landmarks = Landmarks::load(&content_directory, &content)?;
     let mut app = App::new();
     app.add_plugins((
         MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(Duration::from_secs_f64(
@@ -43,7 +44,8 @@ fn run() -> Result<AppExit, Box<dyn Error>> {
         ShardPlugins,
         RepliconRenetServerPlugin,
     ))
-    .insert_resource(content);
+    .insert_resource(content)
+    .insert_resource(landmarks);
     let local_address = listen(&mut app, address)?;
     info!("the shard listens on {local_address}");
     Ok(app.run())

@@ -22,4 +22,8 @@ pub enum ContentError {
     InvalidTree { tree: TreeId, problem: &'static str },
     #[error("the tree {tree} gives the unknown item {item}")]
     UnknownItem { tree: TreeId, item: ItemId },
+    #[error("a landmark names the unknown tree {tree}")]
+    UnknownLandmarkTree { tree: TreeId },
+    #[error("a landmark of the tree {tree} has a position that is not finite")]
+    LandmarkNotFinite { tree: TreeId },
 }
