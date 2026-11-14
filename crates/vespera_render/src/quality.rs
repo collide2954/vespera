@@ -1,11 +1,12 @@
 use bevy::anti_alias::contrast_adaptive_sharpening::ContrastAdaptiveSharpening;
 use bevy::anti_alias::fxaa::Fxaa;
-use bevy::light::{CascadeShadowConfig, CascadeShadowConfigBuilder};
+use bevy::light::{CascadeShadowConfig, CascadeShadowConfigBuilder, ShadowFilteringMethod};
 use bevy::prelude::*;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Quality {
     pub msaa: Msaa,
+    pub shadow_filter: ShadowFilteringMethod,
     pub shadow_cascades: usize,
     pub shadow_map_size: usize,
     pub first_cascade_distance: f32,
@@ -15,6 +16,7 @@ pub struct Quality {
 impl Quality {
     pub const LOW: Self = Self {
         msaa: Msaa::Off,
+        shadow_filter: ShadowFilteringMethod::Hardware2x2,
         shadow_cascades: 2,
         shadow_map_size: 1024,
         first_cascade_distance: 15.0,
@@ -22,11 +24,12 @@ impl Quality {
     };
 
     #[must_use]
-    pub fn camera(&self) -> (Msaa, Fxaa, ContrastAdaptiveSharpening) {
+    pub fn camera(&self) -> impl Bundle {
         (
             self.msaa,
             Fxaa::default(),
             ContrastAdaptiveSharpening::default(),
+            self.shadow_filter,
         )
     }
 
@@ -46,6 +49,7 @@ impl Quality {
 mod tests {
     use bevy::anti_alias::contrast_adaptive_sharpening::ContrastAdaptiveSharpening;
     use bevy::anti_alias::fxaa::Fxaa;
+    use bevy::light::ShadowFilteringMethod;
     use bevy::prelude::*;
 
     use super::Quality;
@@ -69,6 +73,18 @@ mod tests {
             world
                 .get::<ContrastAdaptiveSharpening>(camera)
                 .is_some_and(|sharpening| sharpening.enabled)
+        );
+    }
+
+    #[test]
+    fn a_low_camera_uses_the_hardware_2x2_shadow_filter() {
+        let mut world = World::new();
+
+        let camera = world.spawn(Quality::LOW.camera()).id();
+
+        assert_eq!(
+            world.get::<ShadowFilteringMethod>(camera),
+            Some(&ShadowFilteringMethod::Hardware2x2)
         );
     }
 
