@@ -63,7 +63,7 @@ The GPU budget has a total of 14 ms. The remaining 2.7 ms is a reserve.
 - Use Bevy forward rendering with the Vespera material. On Low, the material uses few texture samples and a simple light model.
 - Do not use MSAA. Use SMAA or FXAA, then contrast adaptive sharpening (CAS).
 - Render the 3D scene at the dynamic render scale. Render the UI at the full output resolution.
-- Use 2 shadow cascades at 1024 × 1024. Contact shadows are off.
+- Use 2 shadow cascades at 1024 × 1024, up to 60 m. Contact shadows are off.
 - Use distance fog and height fog. Volumetric fog is only for the High and Ultra presets.
 - Update the sky at a low rate, not in each frame.
 - Use instanced grass with wind in the vertex shader. On Low, grass fades out at 40 m.

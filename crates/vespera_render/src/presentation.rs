@@ -1,3 +1,4 @@
+use bevy::light::DirectionalLightShadowMap;
 use bevy::prelude::*;
 use vespera_client::{LocalMoveInput, LocalPlayer, Prediction};
 use vespera_core::Position;
@@ -5,7 +6,7 @@ use vespera_motion::MoveInput;
 use vespera_protocol::{Character, InteractIntent};
 use vespera_rules::woodcutting::{Felled, REACH, Tree};
 
-use crate::{MoveKey, follow_camera, move_direction, nearest_in_reach};
+use crate::{MoveKey, Quality, follow_camera, move_direction, nearest_in_reach};
 
 const MOVE_KEYS: [(KeyCode, MoveKey); 4] = [
     (KeyCode::KeyW, MoveKey::Forward),
@@ -40,6 +41,9 @@ impl Plugin for PresentationPlugin {
                 color: Color::srgb(0.55, 0.50, 0.75),
                 brightness: AMBIENT_BRIGHTNESS,
                 ..default()
+            })
+            .insert_resource(DirectionalLightShadowMap {
+                size: Quality::LOW.shadow_map_size,
             })
             .add_systems(Startup, (prepare_looks, spawn_scene))
             .add_systems(
@@ -88,7 +92,11 @@ fn spawn_scene(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    commands.spawn((Camera3d::default(), follow_camera(Vec3::ZERO)));
+    commands.spawn((
+        Camera3d::default(),
+        Quality::LOW.camera(),
+        follow_camera(Vec3::ZERO),
+    ));
     commands.spawn((
         DirectionalLight {
             color: Color::srgb(1.0, 0.78, 0.58),
@@ -96,6 +104,7 @@ fn spawn_scene(
             shadow_maps_enabled: true,
             ..default()
         },
+        Quality::LOW.sun_shadows(),
         Transform::from_xyz(-6.0, 4.0, 8.0).looking_at(Vec3::ZERO, Vec3::Y),
     ));
     commands.spawn((
