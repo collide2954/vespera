@@ -14,10 +14,13 @@ Read the design in [docs/design](docs/design/README.md).
 
 Do these steps from the root of the repository:
 
-1. Start a local shard: `cargo run -p vespera_server`.
-2. In a second terminal, start the client: `cargo run -p vespera`.
-3. Move with W, A, S and D. Hold Left Shift to sprint.
-4. Go near a tree and push E to cut it.
+1. Build the shard and the client: `cargo build --workspace`.
+2. Start a local shard: `target/debug/vespera-server`.
+3. In a second terminal, start the client: `target/debug/vespera`.
+4. Move with W, A, S and D. Hold Left Shift to sprint.
+5. Go near a tree and push E to cut it.
+
+Do not use `cargo run -p` for these crates. A build of one package selects other Bevy features than a build of the workspace. Thus Cargo builds Bevy again, and this takes a long time.
 
 The shard listens on `127.0.0.1:5000`. To use a different address, set the `VESPERA_SHARD_ADDRESS` variable for the shard and the `VESPERA_SERVER` variable for the client.
 
