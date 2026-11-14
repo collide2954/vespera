@@ -5927,6 +5927,7 @@ name = "vespera_render"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "tempfile",
  "vespera_client",
  "vespera_core",
  "vespera_motion",

@@ -6,12 +6,15 @@ use anyhow::{Context, Result};
 use bevy::DefaultPlugins;
 use bevy::app::{App, AppExit, PluginGroup};
 use bevy::render::RenderPlugin;
-use bevy::render::settings::{Backends, WgpuSettings};
+use bevy::render::settings::{Backends, Dx12Compiler, WgpuSettings};
 use bevy::utils::default;
 use bevy::window::{Window, WindowPlugin};
 use bevy_replicon_renet::RepliconRenetClientPlugin;
 use vespera_client::{ClientLogicPlugins, connect};
-use vespera_render::{Benchmark, BenchmarkPlugin, PresentationPlugin, render_backends};
+use vespera_render::{
+    Benchmark, BenchmarkPlugin, DXC_LIBRARY, PresentationPlugin, dxc_next_to, render_backends,
+    shader_compiler,
+};
 
 const DEFAULT_SERVER: &str = "127.0.0.1:5000";
 
@@ -31,6 +34,14 @@ fn run() -> Result<AppExit> {
         .parse()
         .context("VESPERA_SERVER is not a socket address")?;
     let benchmark = benchmark_from_environment()?;
+    let dxc_library = env::current_exe()
+        .ok()
+        .and_then(|executable| dxc_next_to(&executable));
+    if cfg!(windows) && dxc_library.is_none() {
+        eprintln!(
+            "warning: {DXC_LIBRARY} is not next to the game, thus Direct3D 12 uses the slow FXC shader compiler. Run cargo xtask fetch-dxc."
+        );
+    }
     let mut app = App::new();
     app.add_plugins((
         DefaultPlugins
@@ -44,6 +55,7 @@ fn run() -> Result<AppExit> {
             .set(RenderPlugin {
                 render_creation: WgpuSettings {
                     backends: Some(render_backends(Backends::from_env(), cfg!(windows))),
+                    dx12_shader_compiler: shader_compiler(Dx12Compiler::from_env(), dxc_library),
                     ..default()
                 }
                 .into(),

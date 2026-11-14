@@ -71,3 +71,4 @@ This folder contains the design of Vespera. The design has two parts:
 | D37 | Human models | MakeHuman and MPFB: CC0 bodies, morph targets and the human rig. | 10.2 |
 | D38 | Animation sources | The 100STYLE motion capture data (CC-BY-4.0) for locomotion. Universal Animation Library clips (CC0) for actions. | 4.3 |
 | D39 | Nature sources | Poly Haven and ambientCG scans (CC0) for rocks, plants and materials. A tree generator makes the trees. | 10.2 |
+| D40 | Shader compiler on Windows | DXC from the official release of Microsoft, as `dxcompiler.dll` next to the client. FXC made the main render pass approximately 30 times slower on the reference computer. | 9.1 |

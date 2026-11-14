@@ -15,6 +15,8 @@ The reference benchmark computer is a T590 with an i5-8365U. It has more memory 
 
 On Windows, the client uses Direct3D 12. On the reference computer, the client crashed in the Intel Vulkan driver. The `WGPU_BACKEND` variable can select a different backend.
 
+Direct3D 12 uses the DXC shader compiler from the file `dxcompiler.dll` next to the client. Without that file, the client uses the older FXC compiler and writes a warning. With FXC, the main render pass was approximately 30 times slower on the reference computer. The `WGPU_DX12_COMPILER` variable can select a different compiler.
+
 ## 9.2 Client targets
 
 These targets are for the Low preset on the spec floor.

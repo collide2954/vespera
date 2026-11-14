@@ -15,5 +15,8 @@ vespera_motion.workspace = true
 vespera_protocol.workspace = true
 vespera_rules.workspace = true
 
+[dev-dependencies]
+tempfile.workspace = true
+
 [lints]
 workspace = true

@@ -7,7 +7,7 @@ mod presentation;
 mod quality;
 mod targets;
 
-pub use backends::render_backends;
+pub use backends::{DXC_LIBRARY, dxc_next_to, render_backends, shader_compiler};
 pub use benchmark::{Benchmark, BenchmarkPlugin};
 pub use camera::{CAMERA_OFFSET, follow_camera};
 pub use controls::{MoveKey, move_direction};
