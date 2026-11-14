@@ -5,6 +5,7 @@
 - The code uses Rust edition 2024. The file `rust-toolchain.toml` pins one stable Rust version.
 - The project starts with Bevy 0.20. It moves to each new Bevy release when the main ecosystem crates work with that release. The main ecosystem crates are `bevy_replicon`, `avian3d`, `bevy_yarnspinner`, `bevy_enhanced_input` and `bevy_kira_audio`.
 - Development builds use dynamic links for Bevy, the LLD linker and optimized dependencies. These settings make builds faster.
+- In development builds, the debug information of dependencies contains only line tables. Full debug information made the linker use all memory when many test binaries linked at the same time.
 
 ## 11.2 Test-driven development
 
