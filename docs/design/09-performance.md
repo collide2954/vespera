@@ -91,6 +91,8 @@ Each preset is a data file. At the first launch, the client selects a preset fro
 ## 9.7 Measurement
 
 - `cargo xtask bench` starts the client in benchmark mode. The camera follows a fixed path through the test valley at dusk, with 100 bot characters.
+- The client starts in benchmark mode when the `VESPERA_BENCHMARK_SECONDS` variable is set. It starts to record frames when the client controls its character.
+- Measure on mains power. On battery, the reference computer limits the GPU clock.
 - The benchmark records these values:
   - The frame times: p50, p95, p99 and 1% low.
   - The GPU time of each render pass.

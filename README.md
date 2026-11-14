@@ -24,6 +24,8 @@ Do not use `cargo run -p` for these crates. A build of one package selects other
 
 On Windows, the client uses Direct3D 12. To select a different graphics backend, set the `WGPU_BACKEND` variable, for example to `vulkan`.
 
+To measure the frame rate, set the `VESPERA_BENCHMARK_SECONDS` variable for the client, for example to `20`. After that time, the client writes the frame times (p50, p95, p99 and the 1% low) to the log and stops. Measure on mains power, because the battery limits the GPU.
+
 The shard listens on `127.0.0.1:5000`. To use a different address, set the `VESPERA_SHARD_ADDRESS` variable for the shard and the `VESPERA_SERVER` variable for the client.
 
 ## Goals

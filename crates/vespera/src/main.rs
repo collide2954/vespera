@@ -1,5 +1,6 @@
 use std::env;
 use std::net::SocketAddr;
+use std::time::Duration;
 
 use anyhow::{Context, Result};
 use bevy::DefaultPlugins;
@@ -10,7 +11,7 @@ use bevy::utils::default;
 use bevy::window::{Window, WindowPlugin};
 use bevy_replicon_renet::RepliconRenetClientPlugin;
 use vespera_client::{ClientLogicPlugins, connect};
-use vespera_render::{PresentationPlugin, render_backends};
+use vespera_render::{Benchmark, BenchmarkPlugin, PresentationPlugin, render_backends};
 
 const DEFAULT_SERVER: &str = "127.0.0.1:5000";
 
@@ -29,6 +30,7 @@ fn run() -> Result<AppExit> {
         .unwrap_or_else(|_| DEFAULT_SERVER.to_owned())
         .parse()
         .context("VESPERA_SERVER is not a socket address")?;
+    let benchmark = benchmark_from_environment()?;
     let mut app = App::new();
     app.add_plugins((
         DefaultPlugins
@@ -50,7 +52,23 @@ fn run() -> Result<AppExit> {
         ClientLogicPlugins,
         RepliconRenetClientPlugin,
         PresentationPlugin,
+        BenchmarkPlugin,
     ));
+    if let Some(benchmark) = benchmark {
+        app.insert_resource(benchmark);
+    }
     connect(&mut app, server)?;
     Ok(app.run())
+}
+
+fn benchmark_from_environment() -> Result<Option<Benchmark>> {
+    let Ok(text) = env::var("VESPERA_BENCHMARK_SECONDS") else {
+        return Ok(None);
+    };
+    let seconds: u64 = text
+        .parse()
+        .context("VESPERA_BENCHMARK_SECONDS is not a whole number of seconds")?;
+    Ok(Some(Benchmark {
+        duration: Duration::from_secs(seconds),
+    }))
 }
