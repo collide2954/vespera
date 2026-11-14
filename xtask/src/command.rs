@@ -1,10 +1,13 @@
+use std::path::Path;
+
 use anyhow::{Result, bail, ensure};
 
+use crate::assets::{self, Curl};
 use crate::comments::{self, Allowlist};
 use crate::finding::Finding;
 use crate::{docs, layers, repository, text_only};
 
-const COMMANDS: &str = "check-text-only, check-comments, check-docs, check-layers";
+const COMMANDS: &str = "check-text-only, check-comments, check-docs, check-layers, fetch-assets";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Check {
@@ -14,39 +17,56 @@ enum Check {
     Layers,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Task {
+    Check(Check),
+    FetchAssets,
+}
+
 pub fn run(arguments: impl Iterator<Item = String>) -> Result<()> {
-    let check = parse(arguments)?;
     let root = repository::root();
-    let files = repository::files(&root)?;
+    match parse(arguments)? {
+        Task::Check(check) => run_check(check, &root),
+        Task::FetchAssets => fetch_assets(&root),
+    }
+}
+
+fn run_check(check: Check, root: &Path) -> Result<()> {
+    let files = repository::files(root)?;
     let findings = match check {
         Check::TextOnly => text_only::check(&files),
         Check::Comments => comments::check(&files, &Allowlist::from_files(&files)?),
         Check::Docs => docs::check(&files),
         Check::Layers => layers::check(
-            &root,
-            &layers::cargo_metadata(&root)?,
+            root,
+            &layers::cargo_metadata(root)?,
             &layers::rules_text(&files)?,
         )?,
     };
     report(&findings)
 }
 
-fn parse(mut arguments: impl Iterator<Item = String>) -> Result<Check> {
+fn fetch_assets(root: &Path) -> Result<()> {
+    assets::fetch(root, &Curl, &mut |line| println!("{line}"))
+}
+
+fn parse(mut arguments: impl Iterator<Item = String>) -> Result<Task> {
     let Some(name) = arguments.next() else {
         bail!("no command. Use one of these commands: {COMMANDS}");
     };
-    let check = match name.as_str() {
-        "check-text-only" => Check::TextOnly,
-        "check-comments" => Check::Comments,
-        "check-docs" => Check::Docs,
-        "check-layers" => Check::Layers,
+    let task = match name.as_str() {
+        "check-text-only" => Task::Check(Check::TextOnly),
+        "check-comments" => Task::Check(Check::Comments),
+        "check-docs" => Task::Check(Check::Docs),
+        "check-layers" => Task::Check(Check::Layers),
+        "fetch-assets" => Task::FetchAssets,
         unknown => bail!("unknown command: {unknown}. Use one of these commands: {COMMANDS}"),
     };
     ensure!(
         arguments.next().is_none(),
         "the command {name} takes no arguments"
     );
-    Ok(check)
+    Ok(task)
 }
 
 fn report(findings: &[Finding]) -> Result<()> {
@@ -64,7 +84,7 @@ fn report(findings: &[Finding]) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::{Check, parse, report};
+    use super::{Check, Task, parse, report};
     use crate::finding::Finding;
 
     fn arguments(values: &[&str]) -> impl Iterator<Item = String> {
@@ -79,7 +99,7 @@ mod tests {
     fn check_text_only_is_a_command() {
         assert_eq!(
             parse(arguments(&["check-text-only"])).unwrap(),
-            Check::TextOnly
+            Task::Check(Check::TextOnly)
         );
     }
 
@@ -87,18 +107,32 @@ mod tests {
     fn check_comments_is_a_command() {
         assert_eq!(
             parse(arguments(&["check-comments"])).unwrap(),
-            Check::Comments
+            Task::Check(Check::Comments)
         );
     }
 
     #[test]
     fn check_docs_is_a_command() {
-        assert_eq!(parse(arguments(&["check-docs"])).unwrap(), Check::Docs);
+        assert_eq!(
+            parse(arguments(&["check-docs"])).unwrap(),
+            Task::Check(Check::Docs)
+        );
     }
 
     #[test]
     fn check_layers_is_a_command() {
-        assert_eq!(parse(arguments(&["check-layers"])).unwrap(), Check::Layers);
+        assert_eq!(
+            parse(arguments(&["check-layers"])).unwrap(),
+            Task::Check(Check::Layers)
+        );
+    }
+
+    #[test]
+    fn fetch_assets_is_a_command() {
+        assert_eq!(
+            parse(arguments(&["fetch-assets"])).unwrap(),
+            Task::FetchAssets
+        );
     }
 
     #[test]
@@ -107,6 +141,7 @@ mod tests {
 
         assert!(error.contains("unknown command: fly"));
         assert!(error.contains("check-text-only"));
+        assert!(error.contains("fetch-assets"));
     }
 
     #[test]

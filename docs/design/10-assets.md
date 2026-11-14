@@ -61,10 +61,11 @@ Each asset has a license record with its source URL, its author, its license and
 
 The git repository is text-only. All binary files are in the asset store.
 
-- The asset store is the release area of a separate public GitHub repository. The proposed name is `vespera-assets`.
+- The asset store is the release area of a separate public GitHub repository, [vespera-assets](https://github.com/collide2954/vespera-assets).
 - Each release is a set of archives with a version. A release never changes after its publication.
-- The file `assets.toml` in the main repository lists each archive: the name, the version, the URL, the SHA-256 hash, the size and the license.
-- `cargo xtask fetch-assets` downloads the archives, verifies each hash and extracts the archives to a local cache.
+- The file `assets.toml` in the main repository lists each archive: the name, the version, the HTTPS URL, the SHA-256 hash, the size and the licenses.
+- `cargo xtask fetch-assets` downloads the archives with curl. It verifies the size and the SHA-256 hash of each archive. Then it extracts the archive to the `assets` folder, which Git ignores.
+- Each extracted archive contains a stamp file with its hash. The command downloads an archive again only when its hash changes.
 - The asset store also contains the layer maps of the world compiler and the golden screenshots of the visual tests.
 - To add an archive, a maintainer uploads it with `gh release upload`. Then the maintainer changes `assets.toml` in a commit.
 
