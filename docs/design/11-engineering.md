@@ -73,7 +73,7 @@ GitHub Actions runs these jobs for each push to `main`:
 | Test | Windows, Linux and macOS | A test fails. |
 | Database | Linux, with PostgreSQL | A persistence test fails on PostgreSQL. |
 | Coverage | Linux | The line coverage is less than 90%. The job measures all crates except the presentation crates. |
-| Dependencies | Linux | cargo-deny finds a bad license, a security advisory or a bad source. |
+| Dependencies | Linux | cargo-deny finds a license that is not in `deny.toml`, a security advisory or a bad source. `deny.toml` gives the reason for each ignored advisory. |
 | Text-only | Linux | The repository contains a binary file. |
 | Comments | Linux | A `//` or `/* */` comment is not in the allowlist, or an allowlist entry has no reason or matches no comment. |
 | Layers | Linux | A crate has a forbidden dependency. |
