@@ -15,10 +15,11 @@ Read the design in [docs/design](docs/design/README.md).
 Do these steps from the root of the repository:
 
 1. Build the shard and the client: `cargo build --workspace`.
-2. Start a local shard: `target/debug/vespera-server`.
-3. In a second terminal, start the client: `target/debug/vespera`.
-4. Move with W, A, S and D. Hold Left Shift to sprint.
-5. Go near a tree and push E to cut it.
+2. On Windows, download the DXC shader compiler: `cargo xtask fetch-dxc`.
+3. Start a local shard: `target/debug/vespera-server`.
+4. In a second terminal, start the client: `target/debug/vespera`.
+5. Move with W, A, S and D. Hold Left Shift to sprint.
+6. Go near a tree and push E to cut it.
 
 Do not use `cargo run -p` for these crates. A build of one package selects other Bevy features than a build of the workspace. Thus Cargo builds Bevy again, and this takes a long time.
 

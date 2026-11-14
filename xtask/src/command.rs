@@ -5,9 +5,10 @@ use anyhow::{Result, bail, ensure};
 use crate::assets::{self, Curl};
 use crate::comments::{self, Allowlist};
 use crate::finding::Finding;
-use crate::{docs, layers, repository, text_only};
+use crate::{docs, dxc, layers, repository, text_only};
 
-const COMMANDS: &str = "check-text-only, check-comments, check-docs, check-layers, fetch-assets";
+const COMMANDS: &str =
+    "check-text-only, check-comments, check-docs, check-layers, fetch-assets, fetch-dxc";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Check {
@@ -21,13 +22,15 @@ enum Check {
 enum Task {
     Check(Check),
     FetchAssets,
+    FetchDxc,
 }
 
 pub fn run(arguments: impl Iterator<Item = String>) -> Result<()> {
     let root = repository::root();
     match parse(arguments)? {
         Task::Check(check) => run_check(check, &root),
-        Task::FetchAssets => fetch_assets(&root),
+        Task::FetchAssets => assets::fetch(&root, &Curl, &mut |line| println!("{line}")),
+        Task::FetchDxc => dxc::fetch(&root, &Curl, &mut |line| println!("{line}")),
     }
 }
 
@@ -46,10 +49,6 @@ fn run_check(check: Check, root: &Path) -> Result<()> {
     report(&findings)
 }
 
-fn fetch_assets(root: &Path) -> Result<()> {
-    assets::fetch(root, &Curl, &mut |line| println!("{line}"))
-}
-
 fn parse(mut arguments: impl Iterator<Item = String>) -> Result<Task> {
     let Some(name) = arguments.next() else {
         bail!("no command. Use one of these commands: {COMMANDS}");
@@ -60,6 +59,7 @@ fn parse(mut arguments: impl Iterator<Item = String>) -> Result<Task> {
         "check-docs" => Task::Check(Check::Docs),
         "check-layers" => Task::Check(Check::Layers),
         "fetch-assets" => Task::FetchAssets,
+        "fetch-dxc" => Task::FetchDxc,
         unknown => bail!("unknown command: {unknown}. Use one of these commands: {COMMANDS}"),
     };
     ensure!(
@@ -133,6 +133,11 @@ mod tests {
             parse(arguments(&["fetch-assets"])).unwrap(),
             Task::FetchAssets
         );
+    }
+
+    #[test]
+    fn fetch_dxc_is_a_command() {
+        assert_eq!(parse(arguments(&["fetch-dxc"])).unwrap(), Task::FetchDxc);
     }
 
     #[test]

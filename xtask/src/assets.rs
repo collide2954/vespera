@@ -1,5 +1,7 @@
 mod fetch;
 mod manifest;
+#[cfg(test)]
+pub mod testing;
 
 use std::fs;
 use std::path::Path;
@@ -9,7 +11,10 @@ use anyhow::{Context, Result};
 use fetch::{Outcome, fetch_archive};
 use manifest::Manifest;
 
+#[cfg(test)]
+pub use fetch::sha256_of;
 pub use fetch::{Curl, Download};
+pub use manifest::Archive;
 
 pub const MANIFEST: &str = "assets.toml";
 pub const CACHE: &str = "assets";
@@ -23,55 +28,52 @@ pub fn fetch(root: &Path, source: &impl Download, report: &mut impl FnMut(String
     }
     let cache = root.join(CACHE);
     for archive in &manifest.archives {
-        let label = format!("{} version {}", archive.name, archive.version);
-        if fetch::is_current(&cache.join(&archive.name), &archive.sha256) {
-            report(format!("{label} is current"));
-            continue;
-        }
-        report(format!(
-            "downloading {label} ({} MB)",
-            archive.size.div_ceil(1_000_000)
-        ));
-        if fetch_archive(archive, &cache, source)? == Outcome::Fetched {
-            report(format!("fetched {label}"));
-        }
+        fetch_one(archive, &cache, source, report)?;
+    }
+    Ok(())
+}
+
+pub fn fetch_one(
+    archive: &Archive,
+    cache: &Path,
+    source: &impl Download,
+    report: &mut impl FnMut(String),
+) -> Result<()> {
+    let label = format!("{} version {}", archive.name, archive.version);
+    if fetch::is_current(&cache.join(&archive.name), &archive.sha256) {
+        report(format!("{label} is current"));
+        return Ok(());
+    }
+    report(format!(
+        "downloading {label} ({} MB)",
+        archive.size.div_ceil(1_000_000)
+    ));
+    if fetch_archive(archive, cache, source)? == Outcome::Fetched {
+        report(format!("fetched {label}"));
     }
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
-    use std::fs::{self, File};
-    use std::io::Write;
+    use std::fs;
     use std::path::{Path, PathBuf};
 
     use anyhow::Result;
-    use zip::ZipWriter;
-    use zip::write::SimpleFileOptions;
 
     use super::fetch::sha256_of;
     use super::manifest::Manifest;
+    use super::testing::{LocalFile, zip_with};
     use super::{CACHE, Download, MANIFEST, fetch};
     use crate::repository;
 
-    struct LocalFile(PathBuf);
-
-    impl Download for LocalFile {
-        fn download(&self, _url: &str, destination: &Path) -> Result<()> {
-            fs::copy(&self.0, destination)?;
-            Ok(())
-        }
-    }
-
     fn root_with_one_archive() -> (tempfile::TempDir, PathBuf) {
         let root = tempfile::tempdir().unwrap();
-        let zip = root.path().join("valley-1.zip");
-        let mut writer = ZipWriter::new(File::create(&zip).unwrap());
-        writer
-            .start_file("rocks/boulder.txt", SimpleFileOptions::default())
-            .unwrap();
-        writer.write_all(b"granite").unwrap();
-        writer.finish().unwrap();
+        let zip = zip_with(
+            root.path(),
+            "valley-1.zip",
+            &[("rocks/boulder.txt", "granite")],
+        );
         let manifest = format!(
             "[[archive]]\nname = \"valley\"\nversion = 1\nurl = \"https://assets.test/valley-1.zip\"\nsha256 = \"{}\"\nsize = {}\nlicenses = [\"CC0-1.0\"]\n",
             sha256_of(&zip).unwrap(),

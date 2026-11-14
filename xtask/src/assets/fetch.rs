@@ -187,34 +187,15 @@ fn remove_folder_if_present(path: &Path) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use std::fs::{self, File};
-    use std::io::Write;
+    use std::fs;
     use std::path::{Path, PathBuf};
 
     use anyhow::{Result, bail};
     use tempfile::TempDir;
-    use zip::write::SimpleFileOptions;
-    use zip::{CompressionMethod, ZipWriter};
 
     use super::{Curl, Download, Outcome, STAMP, fetch_archive, sha256_of};
     use crate::assets::manifest::Archive;
-
-    struct LocalFile(PathBuf);
-
-    impl Download for LocalFile {
-        fn download(&self, _url: &str, destination: &Path) -> Result<()> {
-            fs::copy(&self.0, destination)?;
-            Ok(())
-        }
-    }
-
-    struct Offline;
-
-    impl Download for Offline {
-        fn download(&self, url: &str, _destination: &Path) -> Result<()> {
-            bail!("the test expected no download, but got {url}")
-        }
-    }
+    use crate::assets::testing::{LocalFile, Offline, zip_with};
 
     struct Broken;
 
@@ -223,18 +204,6 @@ mod tests {
             fs::write(destination, "partial")?;
             bail!("the connection closed")
         }
-    }
-
-    fn zip_with(directory: &Path, file: &str, entries: &[(&str, &str)]) -> PathBuf {
-        let path = directory.join(file);
-        let mut writer = ZipWriter::new(File::create(&path).unwrap());
-        let options = SimpleFileOptions::default().compression_method(CompressionMethod::Stored);
-        for (name, contents) in entries {
-            writer.start_file(*name, options).unwrap();
-            writer.write_all(contents.as_bytes()).unwrap();
-        }
-        writer.finish().unwrap();
-        path
     }
 
     fn archive_of(path: &Path) -> Archive {

@@ -5,6 +5,8 @@
 - The code uses Rust edition 2024. The file `rust-toolchain.toml` pins one stable Rust version.
 - The project starts with Bevy 0.20. It moves to each new Bevy release when the main ecosystem crates work with that release. The main ecosystem crates are `bevy_replicon`, `avian3d`, `bevy_yarnspinner`, `bevy_enhanced_input` and `bevy_kira_audio`.
 - Development builds use dynamic links for Bevy, the LLD linker and optimized dependencies. These settings make builds faster.
+- On Windows, `cargo xtask fetch-dxc` downloads the official DXC release of Microsoft and verifies its SHA-256 hash. Then it puts `dxcompiler.dll` and its licenses next to the binaries in `target`. Run it again after `cargo clean`.
+- DXC uses the MIT license and the University of Illinois/NCSA license. Each release package for Windows must contain `dxcompiler.dll` and these licenses.
 - In development builds, the debug information of dependencies contains only line tables. Full debug information made the linker use all memory when many test binaries linked at the same time.
 
 ## 11.2 Test-driven development

@@ -2,6 +2,7 @@ mod assets;
 mod command;
 mod comments;
 mod docs;
+mod dxc;
 mod finding;
 mod layers;
 mod repository;
