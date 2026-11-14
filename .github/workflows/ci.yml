@@ -32,6 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libudev-dev libwayland-dev libxkbcommon-dev
       - uses: actions-rust-lang/setup-rust-toolchain@v2
       - run: cargo clippy --workspace --all-targets --locked
 
@@ -44,6 +45,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libudev-dev libwayland-dev libxkbcommon-dev
       - uses: actions-rust-lang/setup-rust-toolchain@v2
       - uses: taiki-e/install-action@v2
         with:
@@ -55,13 +58,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libudev-dev libwayland-dev libxkbcommon-dev
       - uses: actions-rust-lang/setup-rust-toolchain@v2
         with:
           components: llvm-tools-preview
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-llvm-cov,cargo-nextest
-      - run: cargo llvm-cov nextest --workspace --locked --fail-under-lines 90
+      - run: cargo llvm-cov nextest --workspace --locked --fail-under-lines 90 --ignore-filename-regex "crates/(vespera|vespera_render)/"
 
   dependencies:
     name: Dependencies

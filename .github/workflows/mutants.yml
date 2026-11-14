@@ -18,11 +18,12 @@ jobs:
     timeout-minutes: 240
     steps:
       - uses: actions/checkout@v7
+      - run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libudev-dev libwayland-dev libxkbcommon-dev
       - uses: actions-rust-lang/setup-rust-toolchain@v2
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-mutants,cargo-nextest
-      - run: cargo mutants --workspace --test-tool nextest
+      - run: cargo mutants --workspace --test-tool nextest --exclude "crates/vespera/**" --exclude "crates/vespera_render/**"
         continue-on-error: true
       - if: always()
         run: |

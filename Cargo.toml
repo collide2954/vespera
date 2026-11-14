@@ -6,6 +6,7 @@ members = [
     "crates/vespera_core",
     "crates/vespera_motion",
     "crates/vespera_protocol",
+    "crates/vespera_render",
     "crates/vespera_rules",
     "crates/vespera_server",
     "crates/vespera_testkit",

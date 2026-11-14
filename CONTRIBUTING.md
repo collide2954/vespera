@@ -17,6 +17,6 @@ This file gives the rules for all changes to Vespera. The full rules are in [doc
 Do these steps:
 
 1. Run the formatter: `cargo fmt --all`.
-2. Run the linter: `cargo clippy --workspace --all-targets`.
+2. Run the linter: `cargo lint`. The linter uses a separate target folder, because check builds and test builds of the same dependencies can conflict.
 3. Run all tests: `cargo test --workspace`.
 4. Run the repository checks: `cargo xtask check-text-only`, `cargo xtask check-comments`, `cargo xtask check-docs` and `cargo xtask check-layers`.
