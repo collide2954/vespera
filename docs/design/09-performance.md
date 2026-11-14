@@ -13,6 +13,8 @@
 
 The reference benchmark computer is a T590 with an i5-8365U. It has more memory than the spec floor. Thus memory budgets must fit a computer with 12 GB.
 
+On Windows, the client uses Direct3D 12. On the reference computer, the client crashed in the Intel Vulkan driver. The `WGPU_BACKEND` variable can select a different backend.
+
 ## 9.2 Client targets
 
 These targets are for the Low preset on the spec floor.
