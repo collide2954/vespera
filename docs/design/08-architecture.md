@@ -31,7 +31,8 @@ The repository is one Cargo workspace. Each crate has one purpose.
 | `vespera_render` | Library | The stylized material, terrain, sky, fog, foliage, post-processing, quality presets and the dynamic render scale |
 | `vespera_ui` | Library | The widget set and the game screens |
 | `vespera_audio` | Library | Spatial audio, ambience and music |
-| `vespera_client` | Library and binary | The game client |
+| `vespera_client` | Library | The client logic: the connection, prediction and input state |
+| `vespera` | Binary | The game client. It joins the client logic and the presentation crates. |
 | `vespera_testkit` | Library, for tests only | A headless server and headless clients in one process, a simulated network, fixtures and test bots |
 | `xtask` | Binary | Developer tasks (see 8.10) |
 
@@ -46,9 +47,9 @@ The crates have four layers. A crate can use crates in the same layer or in lowe
 | 1. Base | `vespera_core` |
 | 2. Shared logic | `vespera_content`, `vespera_rules`, `vespera_motion`, `vespera_world` |
 | 3. Contracts and storage | `vespera_protocol`, `vespera_persistence`, `vespera_kinematics` |
-| 4. Applications and presentation | `vespera_server`, `vespera_client`, `vespera_render`, `vespera_ui`, `vespera_audio`, `vespera_testkit` |
+| 4. Applications and presentation | `vespera_server`, `vespera_client`, `vespera`, `vespera_render`, `vespera_ui`, `vespera_audio`, `vespera_testkit` |
 
-The client crates are `vespera_client`, `vespera_render`, `vespera_ui`, `vespera_audio` and `vespera_kinematics`. The server crates are `vespera_server`, `vespera_persistence` and the later services.
+The client crates are `vespera_client`, `vespera`, `vespera_render`, `vespera_ui`, `vespera_audio` and `vespera_kinematics`. The server crates are `vespera_server`, `vespera_persistence` and the later services.
 
 More rules:
 
@@ -57,16 +58,16 @@ More rules:
 - `vespera_testkit` is the only exception. It uses the server and the client logic plugins.
 - Only dev-dependencies can use a test crate. No crate can use a tool crate.
 - `vespera_persistence` is only for the server and the services.
-- Only `vespera_client`, `vespera_render`, `vespera_ui`, `vespera_audio` and `vespera_kinematics` use the render, window, audio and UI features of Bevy.
+- Only `vespera`, `vespera_render`, `vespera_ui`, `vespera_audio` and `vespera_kinematics` use the render, window, audio and UI features of Bevy.
 
 The file `layers.toml` gives the layer and the side of each crate. The sides are shared, server, client and test. The file also lists the tool crates, for example `xtask`.
 
 `cargo xtask check-layers` compares `cargo metadata` with `layers.toml`. It reads normal dependencies and build dependencies, but not dev-dependencies. It also fails if a crate has no entry or if an entry has no crate.
 
-The client library has two plugin groups:
+The client has two parts:
 
-- Logic plugins: network, prediction, interpolation and input. The test kit uses only these plugins.
-- Presentation plugins: render, UI, audio and kinematics.
+- Logic: `vespera_client` gives the connection, prediction, interpolation and input state. The test kit uses only this part. Thus the tests do not use a GPU or a window.
+- Presentation: `vespera_render`, `vespera_ui`, `vespera_audio` and `vespera_kinematics`. The `vespera` binary adds these crates to the logic.
 
 ## 8.4 Bevy conventions
 

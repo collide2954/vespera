@@ -6,9 +6,20 @@ Each day at dusk, the veil to the spirit world becomes thin. Spirits walk, rare 
 
 ## Status
 
-Milestone M0 (foundations) is complete. The repository has the workspace, the repository checks, the CI gates and a test kit with a headless server and a headless client. Milestone M1, the living valley slice, comes next.
+Milestone M0 (foundations) is complete. Work on milestone M1, the living valley slice, has started. A player can walk on flat ground and cut oak trees for logs and Woodcutting experience.
 
 Read the design in [docs/design](docs/design/README.md).
+
+## Play the development version
+
+Do these steps from the root of the repository:
+
+1. Start a local shard: `cargo run -p vespera_server`.
+2. In a second terminal, start the client: `cargo run -p vespera`.
+3. Move with W, A, S and D. Hold Left Shift to sprint.
+4. Go near a tree and push E to cut it.
+
+The shard listens on `127.0.0.1:5000`. To use a different address, set the `VESPERA_SHARD_ADDRESS` variable for the shard and the `VESPERA_SERVER` variable for the client.
 
 ## Goals
 

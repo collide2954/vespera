@@ -9,6 +9,11 @@ publish.workspace = true
 
 [dependencies]
 bevy = { workspace = true, features = ["3d"] }
+vespera_client.workspace = true
+vespera_core.workspace = true
+vespera_motion.workspace = true
+vespera_protocol.workspace = true
+vespera_rules.workspace = true
 
 [lints]
 workspace = true

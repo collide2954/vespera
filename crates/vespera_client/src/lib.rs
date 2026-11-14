@@ -42,5 +42,6 @@ impl Plugin for PossessionPlugin {
 fn possess(mut possessions: MessageReader<Possess>, mut commands: Commands) {
     for possession in possessions.read() {
         commands.entity(possession.character).insert(LocalPlayer);
+        info!("the client controls its character");
     }
 }

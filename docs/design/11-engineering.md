@@ -83,7 +83,7 @@ GitHub Actions runs these jobs for each push to `main`:
 | Visual | Linux and Windows | A screenshot is different from its golden screenshot by more than the tolerance. |
 | Mutation | Linux, one time each week | The job does not fail. It reports each surviving mutant. |
 
-The presentation crates are `vespera_render`, `vespera_ui` and `vespera_audio`. Visual tests check these crates (see 11.3).
+The presentation crates are `vespera`, `vespera_render`, `vespera_ui` and `vespera_audio`. Visual tests check these crates (see 11.3).
 
 Each job starts in the milestone that adds its subject. For example, the Database job starts with the first PostgreSQL store in M2. The Text-only, Comments, Layers and Documents checks run as steps of one job with the name Repository checks.
 

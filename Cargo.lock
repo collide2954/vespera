@@ -5787,6 +5787,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
+name = "vespera"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_replicon_renet",
+ "vespera_client",
+ "vespera_render",
+]
+
+[[package]]
 name = "vespera_client"
 version = "0.1.0"
 dependencies = [
@@ -5844,6 +5854,11 @@ name = "vespera_render"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "vespera_client",
+ "vespera_core",
+ "vespera_motion",
+ "vespera_protocol",
+ "vespera_rules",
 ]
 
 [[package]]
