@@ -1,11 +1,69 @@
+use std::fmt;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use bevy::render::renderer::RenderDevice;
 use serde::Serialize;
+use sysinfo::{ProcessRefreshKind, ProcessesToUpdate, System};
 
 use crate::{FrameSummary, GpuPassSummary};
+
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub(crate) struct Memory {
+    pub(crate) process_mb: Option<f64>,
+    pub(crate) gpu_mb: Option<f64>,
+}
+
+impl Memory {
+    pub(crate) fn measure(device: Option<&RenderDevice>) -> Self {
+        Self {
+            process_mb: process_memory_mb(),
+            gpu_mb: device.and_then(gpu_memory_mb),
+        }
+    }
+}
+
+impl fmt::Display for Memory {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            formatter,
+            "memory: process {}, GPU {}",
+            amount(self.process_mb),
+            amount(self.gpu_mb)
+        )
+    }
+}
+
+fn amount(megabytes: Option<f64>) -> String {
+    megabytes.map_or_else(|| "unknown".to_owned(), |value| format!("{value:.0} MB"))
+}
+
+pub(crate) fn process_memory_mb() -> Option<f64> {
+    let pid = sysinfo::get_current_pid().ok()?;
+    let mut system = System::new();
+    system.refresh_processes_specifics(
+        ProcessesToUpdate::Some(&[pid]),
+        true,
+        ProcessRefreshKind::nothing().with_memory(),
+    );
+    system
+        .process(pid)
+        .map(|process| megabytes(process.memory()))
+}
+
+fn gpu_memory_mb(device: &RenderDevice) -> Option<f64> {
+    device
+        .wgpu_device()
+        .generate_allocator_report()
+        .map(|report| megabytes(report.total_reserved_bytes))
+}
+
+fn megabytes(bytes: u64) -> f64 {
+    let kibibytes = u32::try_from(bytes / 1024).unwrap_or(u32::MAX);
+    f64::from(kibibytes) / 1024.0
+}
 
 #[derive(Serialize)]
 struct Report<'a> {
@@ -17,6 +75,8 @@ struct Report<'a> {
     one_percent_low_fps: f64,
     gpu_ms_per_frame: Option<f64>,
     gpu_passes: Vec<PassTime<'a>>,
+    process_memory_mb: Option<f64>,
+    gpu_memory_mb: Option<f64>,
 }
 
 #[derive(Serialize)]
@@ -32,6 +92,7 @@ fn hundredths(value: f64) -> f64 {
 pub(crate) fn report_json(
     frames: &FrameSummary,
     gpu: Option<&GpuPassSummary>,
+    memory: &Memory,
 ) -> serde_json::Result<String> {
     let report = Report {
         frames: frames.frames,
@@ -50,6 +111,8 @@ pub(crate) fn report_json(
                 })
                 .collect()
         }),
+        process_memory_mb: memory.process_mb.map(hundredths),
+        gpu_memory_mb: memory.gpu_mb.map(hundredths),
     };
     serde_json::to_string_pretty(&report)
 }
@@ -70,7 +133,7 @@ mod tests {
 
     use serde_json::Value;
 
-    use super::{report_json, write_report};
+    use super::{Memory, process_memory_mb, report_json, write_report};
     use crate::{FrameSummary, GpuPassSummary};
 
     fn frames() -> FrameSummary {
@@ -98,7 +161,7 @@ mod tests {
             ],
         };
 
-        let json = parse(&report_json(&frames(), Some(&gpu)).unwrap());
+        let json = parse(&report_json(&frames(), Some(&gpu), &Memory::default()).unwrap());
 
         assert_eq!(json["frames"], 1200);
         assert_eq!(json["mean_fps"], 58.31);
@@ -117,17 +180,46 @@ mod tests {
         let mut summary = frames();
         summary.p50_ms = f64::from(16.4_f32);
 
-        let json = parse(&report_json(&summary, None).unwrap());
+        let json = parse(&report_json(&summary, None, &Memory::default()).unwrap());
 
         assert_eq!(json["p50_ms"], 16.4);
     }
 
     #[test]
     fn a_report_without_gpu_timers_has_no_gpu_values() {
-        let json = parse(&report_json(&frames(), None).unwrap());
+        let json = parse(&report_json(&frames(), None, &Memory::default()).unwrap());
 
         assert!(json["gpu_ms_per_frame"].is_null());
         assert_eq!(json["gpu_passes"], serde_json::json!([]));
+        assert!(json["gpu_memory_mb"].is_null());
+    }
+
+    #[test]
+    fn a_report_has_the_memory_of_the_process_and_the_gpu() {
+        let memory = Memory {
+            process_mb: Some(812.345),
+            gpu_mb: Some(230.0),
+        };
+
+        let json = parse(&report_json(&frames(), None, &memory).unwrap());
+
+        assert_eq!(json["process_memory_mb"], 812.35);
+        assert_eq!(json["gpu_memory_mb"], 230.0);
+    }
+
+    #[test]
+    fn the_memory_line_names_an_unknown_value() {
+        let memory = Memory {
+            process_mb: Some(812.4),
+            gpu_mb: None,
+        };
+
+        assert_eq!(memory.to_string(), "memory: process 812 MB, GPU unknown");
+    }
+
+    #[test]
+    fn the_test_process_uses_some_memory() {
+        assert!(process_memory_mb().is_some_and(|megabytes| megabytes > 1.0));
     }
 
     #[test]

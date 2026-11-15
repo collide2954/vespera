@@ -115,7 +115,7 @@ The dynamic render scale has 5 steps from the minimum to the maximum of the pres
 - The benchmark records these values:
   - The frame times: p50, p95, p99 and 1% low.
   - The GPU time of each render pass.
-  - The process memory and the GPU memory.
+  - The process memory and the GPU memory at the end of the run. The GPU memory is the memory that the wgpu allocator holds.
 - The benchmark writes a JSON report to the `benchmarks/` folder.
 - Run the benchmark on the reference computer at the end of each milestone, and after each large render change.
 - In CI, criterion benchmarks measure the hot paths: the rules tick with 1,000 players, IK for 100 characters and the exchange order matches. A slowdown of more than 10% causes a warning.

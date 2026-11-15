@@ -6022,6 +6022,7 @@ dependencies = [
  "bevy",
  "serde",
  "serde_json",
+ "sysinfo",
  "tempfile",
  "vespera_client",
  "vespera_core",

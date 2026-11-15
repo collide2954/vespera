@@ -5,15 +5,17 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, SystemTime};
 
 use bevy::diagnostic::DiagnosticsStore;
+use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use bevy::render::diagnostic::RenderDiagnosticsPlugin;
 use bevy::render::render_resource::PipelineCache;
+use bevy::render::renderer::RenderDevice;
 use bevy::render::{Render, RenderApp, RenderSystems};
 use bevy::window::{MonitorSelection, PresentMode, WindowMode};
 use bevy::winit::WinitSettings;
 use vespera_client::LocalPlayer;
 
-use crate::report::{report_json, write_report};
+use crate::report::{Memory, report_json, write_report};
 use crate::{FrameSummary, FrameTimes, GpuPassSummary, GpuPassTimes};
 
 #[derive(Resource, Debug, Clone, PartialEq, Eq)]
@@ -93,12 +95,18 @@ fn prepare_measurement(mut commands: Commands, mut windows: Query<&mut Window>) 
     }
 }
 
+#[derive(SystemParam)]
+struct Sources<'w> {
+    pipelines: Option<Res<'w, PipelinesReady>>,
+    diagnostics: Option<Res<'w, DiagnosticsStore>>,
+    device: Option<Res<'w, RenderDevice>>,
+}
+
 fn record_frames(
     time: Res<Time<Real>>,
     benchmark: Res<Benchmark>,
     players: Query<(), With<LocalPlayer>>,
-    pipelines: Option<Res<PipelinesReady>>,
-    diagnostics: Option<Res<DiagnosticsStore>>,
+    sources: Sources,
     mut recording: Local<Recording>,
     mut exit: MessageWriter<AppExit>,
 ) {
@@ -106,7 +114,7 @@ fn record_frames(
         return;
     }
     if !recording.started {
-        let ready = match pipelines {
+        let ready = match &sources.pipelines {
             Some(pipelines) => pipelines.get(),
             None => true,
         };
@@ -123,28 +131,35 @@ fn record_frames(
     let delta = time.delta();
     recording.times.record(delta.as_secs_f32());
     recording.elapsed += delta;
-    if let Some(diagnostics) = &diagnostics {
+    if let Some(diagnostics) = &sources.diagnostics {
         recording.passes.record(diagnostics);
     }
     if recording.elapsed >= benchmark.duration {
         recording.finished = true;
         let frames = recording.times.summary();
         let passes = recording.passes.summary();
+        let memory = Memory::measure(sources.device.as_deref());
         if let Some(summary) = &frames {
             info!("benchmark: {summary}");
         }
         if let Some(passes) = &passes {
             info!("benchmark: {passes}");
         }
+        info!("benchmark: {memory}");
         if let (Some(folder), Some(summary)) = (&benchmark.reports, &frames) {
-            save_report(folder, summary, passes.as_ref());
+            save_report(folder, summary, passes.as_ref(), &memory);
         }
         exit.write(AppExit::Success);
     }
 }
 
-fn save_report(folder: &Path, frames: &FrameSummary, passes: Option<&GpuPassSummary>) {
-    let saved = report_json(frames, passes)
+fn save_report(
+    folder: &Path,
+    frames: &FrameSummary,
+    passes: Option<&GpuPassSummary>,
+    memory: &Memory,
+) {
+    let saved = report_json(frames, passes, memory)
         .map_err(io::Error::from)
         .and_then(|json| write_report(folder, &json, SystemTime::now()));
     match saved {
@@ -260,6 +275,11 @@ mod tests {
         let json: serde_json::Value =
             serde_json::from_str(&std::fs::read_to_string(&reports[0]).unwrap()).unwrap();
         assert!(json["frames"].as_u64().is_some_and(|frames| frames > 0));
+        assert!(
+            json["process_memory_mb"]
+                .as_f64()
+                .is_some_and(|megabytes| megabytes > 1.0)
+        );
     }
 
     #[test]
