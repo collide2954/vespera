@@ -1,4 +1,5 @@
 mod assets;
+mod bench;
 mod command;
 mod comments;
 mod docs;

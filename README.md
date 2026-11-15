@@ -25,7 +25,7 @@ Do not use `cargo run -p` for these crates. A build of one package selects other
 
 On Windows, the client uses Direct3D 12. To select a different graphics backend, set the `WGPU_BACKEND` variable, for example to `vulkan`.
 
-To measure the frame rate, set the `VESPERA_BENCHMARK_SECONDS` variable for the client, for example to `20`. After that time, the client writes the frame times (p50, p95, p99 and the 1% low) to the log and stops. The log also shows the GPU time of each render pass. The client also writes these values as a JSON report to the `benchmarks` folder. The benchmark uses the full screen without vsync. Measure on mains power, because the battery limits the GPU.
+To measure the frame rate, build the workspace, then run `cargo xtask bench`. The command starts a local shard and the client in benchmark mode for 30 s. To use a different time, add the number of seconds, for example `cargo xtask bench 60`. You can also set the `VESPERA_BENCHMARK_SECONDS` variable for the client yourself. After that time, the client writes the frame times (p50, p95, p99 and the 1% low) to the log and stops. The log also shows the GPU time of each render pass. The client also writes these values as a JSON report to the `benchmarks` folder. The benchmark uses the full screen without vsync. Measure on mains power, because the battery limits the GPU. Other heavy programs, for example builds, decrease the frame rate.
 
 The shard listens on `127.0.0.1:5000`. To use a different address, set the `VESPERA_SHARD_ADDRESS` variable for the shard and the `VESPERA_SERVER` variable for the client.
 

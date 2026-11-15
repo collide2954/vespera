@@ -1,14 +1,15 @@
 use std::path::Path;
 
-use anyhow::{Result, bail, ensure};
+use anyhow::{Context, Result, bail, ensure};
 
 use crate::assets::{self, Curl};
 use crate::comments::{self, Allowlist};
 use crate::finding::Finding;
-use crate::{docs, dxc, layers, repository, text_only};
+use crate::{bench, docs, dxc, layers, repository, text_only};
 
 const COMMANDS: &str =
-    "check-text-only, check-comments, check-docs, check-layers, fetch-assets, fetch-dxc";
+    "bench, check-text-only, check-comments, check-docs, check-layers, fetch-assets, fetch-dxc";
+const BENCH_SECONDS: u64 = 30;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Check {
@@ -20,6 +21,7 @@ enum Check {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Task {
+    Bench { seconds: u64 },
     Check(Check),
     FetchAssets,
     FetchDxc,
@@ -28,6 +30,7 @@ enum Task {
 pub fn run(arguments: impl Iterator<Item = String>) -> Result<()> {
     let root = repository::root();
     match parse(arguments)? {
+        Task::Bench { seconds } => bench::run(&root, seconds),
         Task::Check(check) => run_check(check, &root),
         Task::FetchAssets => assets::fetch(&root, &Curl, &mut |line| println!("{line}")),
         Task::FetchDxc => dxc::fetch(&root, &Curl, &mut |line| println!("{line}")),
@@ -54,6 +57,9 @@ fn parse(mut arguments: impl Iterator<Item = String>) -> Result<Task> {
         bail!("no command. Use one of these commands: {COMMANDS}");
     };
     let task = match name.as_str() {
+        "bench" => Task::Bench {
+            seconds: bench_seconds(arguments.next())?,
+        },
         "check-text-only" => Task::Check(Check::TextOnly),
         "check-comments" => Task::Check(Check::Comments),
         "check-docs" => Task::Check(Check::Docs),
@@ -64,9 +70,20 @@ fn parse(mut arguments: impl Iterator<Item = String>) -> Result<Task> {
     };
     ensure!(
         arguments.next().is_none(),
-        "the command {name} takes no arguments"
+        "too many arguments for the command {name}"
     );
     Ok(task)
+}
+
+fn bench_seconds(argument: Option<String>) -> Result<u64> {
+    let Some(text) = argument else {
+        return Ok(BENCH_SECONDS);
+    };
+    let seconds: u64 = text
+        .parse()
+        .with_context(|| format!("the benchmark time {text} is not a whole number of seconds"))?;
+    ensure!(seconds > 0, "the benchmark time must be more than 0 s");
+    Ok(seconds)
 }
 
 fn report(findings: &[Finding]) -> Result<()> {
@@ -138,6 +155,34 @@ mod tests {
     #[test]
     fn fetch_dxc_is_a_command() {
         assert_eq!(parse(arguments(&["fetch-dxc"])).unwrap(), Task::FetchDxc);
+    }
+
+    #[test]
+    fn bench_is_a_command_with_30_seconds_by_default() {
+        assert_eq!(
+            parse(arguments(&["bench"])).unwrap(),
+            Task::Bench { seconds: 30 }
+        );
+    }
+
+    #[test]
+    fn bench_takes_a_time_in_seconds() {
+        assert_eq!(
+            parse(arguments(&["bench", "60"])).unwrap(),
+            Task::Bench { seconds: 60 }
+        );
+    }
+
+    #[test]
+    fn bench_rejects_a_time_that_is_not_a_positive_whole_number() {
+        for bad in ["0", "-5", "ten", "1.5"] {
+            assert!(parse(arguments(&["bench", bad])).is_err(), "{bad}");
+        }
+    }
+
+    #[test]
+    fn bench_rejects_a_second_argument() {
+        assert!(parse(arguments(&["bench", "30", "extra"])).is_err());
     }
 
     #[test]
