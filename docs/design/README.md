@@ -69,7 +69,7 @@ This folder contains the design of Vespera. The design has two parts:
 | D35 | Asset tiers | Only the free tiers of asset packs. | 10.2 |
 | D36 | First milestone | The living valley slice. | 12.2 |
 | D37 | Human models | MakeHuman and MPFB: CC0 bodies, morph targets and the human rig. | 10.2 |
-| D38 | Animation sources | The 100STYLE motion capture data (CC-BY-4.0) for locomotion. Universal Animation Library clips (CC0) for actions. | 4.3 |
+| D38 | Animation sources | The 100STYLE motion capture data (CC-BY-4.0) for idle, walk and the locomotion styles. A CC0 source for the jog, run and sprint clips at the speeds of 4.7. Universal Animation Library clips (CC0) for actions. | 4.3 |
 | D39 | Nature sources | Poly Haven and ambientCG scans (CC0) for rocks, plants and materials. A tree generator makes the trees. | 10.2 |
 | D40 | Shader compiler on Windows | DXC from the official release of Microsoft, as `dxcompiler.dll` next to the client. FXC made the main render pass approximately 30 times slower on the reference computer. | 9.1 |
 | D41 | Human rig | The `game_engine` rig of MPFB: 53 bones, with fingers and without face bones. | 4.2 |

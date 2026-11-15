@@ -148,3 +148,4 @@ Acceptance criteria:
 | 8 | What is the gamepad layout? | Decide in M8. |
 | 9 | Which tool generates the trees? | Test the free tree add-ons for Blender first. |
 | 10 | Which sources give medieval buildings, weapons and fantasy outfits in the semi-realistic style? | Poly Haven props, and buildings made from ambientCG materials. |
+| 11 | Which CC0 source gives jog, run and sprint clips at the speeds in 4.7? The 100STYLE walk, at approximately 0.8 m/s, is also slower than the walk speed. | The free parts of Universal Animation Library 1 and 2. |

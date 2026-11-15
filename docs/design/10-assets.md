@@ -21,8 +21,8 @@ All sources use CC0 or CC-BY-4.0 (see 10.3). Vespera lighting, fog, color gradin
 |---|---|---|
 | MakeHuman and MPFB | CC0 | Human bodies, the morph targets for customization, and the human rig |
 | MakeHuman asset packs | CC0 or CC-BY-4.0 | Clothes, hair, eyes and skin materials |
-| 100STYLE motion capture data | CC-BY-4.0 | Locomotion clips: walk, run, sidestep, idle and transitions, in 100 styles |
-| Universal Animation Library 1 and 2 (Quaternius) | CC0 | Action clips, for example gather actions, craft actions and attacks |
+| 100STYLE motion capture data | CC-BY-4.0 | Locomotion clips: idle, walk, sidestep and transitions, in 100 styles. The runs are slow jogs, at less than 2 m/s. |
+| Universal Animation Library 1 and 2 (Quaternius) | CC0 | Action clips, for example gather actions, craft actions and attacks. The first candidate for the jog, run and sprint clips (see 12.10). |
 | Poly Haven | CC0 | Scanned rocks, plants, ground cover and props |
 | ambientCG | CC0 | Scanned materials for terrain, bark, leaves, stone and wood |
 | A tree generator | CC0 output | Trees from CC0 bark and leaf textures. Each tree fits the triangle budget, with LOD meshes and impostors. |

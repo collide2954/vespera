@@ -37,11 +37,11 @@ The client makes the pose of each character from six layers. Each layer changes 
 | 5 | Secondary motion | Spring bones for hair, capes, straps, tails and ears. |
 | 6 | Reactions | Hit flinches in the direction of the hit, stagger and knockdown. A cosmetic ragdoll on death. |
 
-Locomotion clips come from the 100STYLE motion capture data. Action clips, and locomotion clips that 100STYLE does not contain, come from Universal Animation Library 1 and 2 (free parts). The import step retargets all clips to the Vespera human rig.
+Idle clips, walk clips and the locomotion styles come from the 100STYLE motion capture data. The 100STYLE runs are slow jogs, at less than 2 m/s, and most of them turn. Thus the jog, run and sprint clips come from a CC0 source for the speeds in 4.7 (see 12.10). Action clips, and other locomotion clips that 100STYLE does not contain, come from Universal Animation Library 1 and 2 (free parts). The import step retargets all clips to the Vespera human rig.
 
 ## 4.4 Locomotion
 
-- Distance matching: the playback speed of each locomotion clip follows the real ground speed of the character. Thus the feet do not slide.
+- Distance matching: the playback speed of each locomotion clip follows the real ground speed of the character. Thus the feet do not slide. The playback rate of a clip stays between 0.5 and 1.5 times its recorded rate, because a faster rate looks hurried. Above this limit, the feet slide.
 - Foot locks: during the stance phase, each foot stays at a fixed position in the world.
 - Momentum: the character controller has curves for acceleration and deceleration. The animation shows the start and the stop of each movement.
 - Turns: a fast turn plays a turn clip. A slow turn uses lean and bank.
