@@ -9,6 +9,8 @@ publish.workspace = true
 
 [dependencies]
 bevy = { workspace = true, features = ["3d", "bevy_sprite_render"] }
+serde.workspace = true
+serde_json.workspace = true
 vespera_client.workspace = true
 vespera_core.workspace = true
 vespera_motion.workspace = true

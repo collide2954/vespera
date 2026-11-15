@@ -1,6 +1,8 @@
+use std::io;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::time::Duration;
+use std::time::{Duration, SystemTime};
 
 use bevy::diagnostic::DiagnosticsStore;
 use bevy::prelude::*;
@@ -11,11 +13,13 @@ use bevy::window::{MonitorSelection, PresentMode, WindowMode};
 use bevy::winit::WinitSettings;
 use vespera_client::LocalPlayer;
 
-use crate::{FrameTimes, GpuPassTimes};
+use crate::report::{report_json, write_report};
+use crate::{FrameSummary, FrameTimes, GpuPassSummary, GpuPassTimes};
 
-#[derive(Resource, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Resource, Debug, Clone, PartialEq, Eq)]
 pub struct Benchmark {
     pub duration: Duration,
+    pub reports: Option<PathBuf>,
 }
 
 pub struct BenchmarkPlugin;
@@ -65,6 +69,7 @@ fn report_pipeline_readiness(cache: Res<PipelineCache>, pipelines: Res<Pipelines
 struct Recording {
     ready_frames: u32,
     started: bool,
+    finished: bool,
     elapsed: Duration,
     times: FrameTimes,
     passes: GpuPassTimes,
@@ -97,7 +102,7 @@ fn record_frames(
     mut recording: Local<Recording>,
     mut exit: MessageWriter<AppExit>,
 ) {
-    if players.is_empty() {
+    if recording.finished || players.is_empty() {
         return;
     }
     if !recording.started {
@@ -122,13 +127,32 @@ fn record_frames(
         recording.passes.record(diagnostics);
     }
     if recording.elapsed >= benchmark.duration {
-        if let Some(summary) = recording.times.summary() {
+        recording.finished = true;
+        let frames = recording.times.summary();
+        let passes = recording.passes.summary();
+        if let Some(summary) = &frames {
             info!("benchmark: {summary}");
         }
-        if let Some(passes) = recording.passes.summary() {
+        if let Some(passes) = &passes {
             info!("benchmark: {passes}");
         }
+        if let (Some(folder), Some(summary)) = (&benchmark.reports, &frames) {
+            save_report(folder, summary, passes.as_ref());
+        }
         exit.write(AppExit::Success);
+    }
+}
+
+fn save_report(folder: &Path, frames: &FrameSummary, passes: Option<&GpuPassSummary>) {
+    let saved = report_json(frames, passes)
+        .map_err(io::Error::from)
+        .and_then(|json| write_report(folder, &json, SystemTime::now()));
+    match saved {
+        Ok(path) => info!("benchmark: report written to {}", path.display()),
+        Err(error) => warn!(
+            "benchmark: cannot write the report to {}: {error}",
+            folder.display()
+        ),
     }
 }
 
@@ -152,7 +176,10 @@ mod tests {
         app.add_plugins((MinimalPlugins, BenchmarkPlugin))
             .insert_resource(TimeUpdateStrategy::ManualDuration(FRAME));
         if let Some(duration) = benchmark {
-            app.insert_resource(Benchmark { duration });
+            app.insert_resource(Benchmark {
+                duration,
+                reports: None,
+            });
         }
         if with_player {
             app.world_mut().spawn(LocalPlayer);
@@ -209,6 +236,30 @@ mod tests {
         let mut app = app_with_pipelines(true);
 
         assert_eq!(run(&mut app, 100), Some(AppExit::Success));
+    }
+
+    #[test]
+    fn the_benchmark_writes_one_json_report_into_its_folder() {
+        let directory = tempfile::tempdir().unwrap();
+        let folder = directory.path().join("benchmarks");
+        let mut app = app(None, true);
+        app.insert_resource(Benchmark {
+            duration: Duration::from_secs(1),
+            reports: Some(folder.clone()),
+        });
+
+        assert_eq!(run(&mut app, 100), Some(AppExit::Success));
+        app.update();
+        app.update();
+
+        let reports: Vec<_> = std::fs::read_dir(&folder)
+            .unwrap()
+            .map(|entry| entry.unwrap().path())
+            .collect();
+        assert_eq!(reports.len(), 1);
+        let json: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(&reports[0]).unwrap()).unwrap();
+        assert!(json["frames"].as_u64().is_some_and(|frames| frames > 0));
     }
 
     #[test]
@@ -269,6 +320,7 @@ mod tests {
             &mut app,
             Benchmark {
                 duration: Duration::from_secs(1),
+                reports: None,
             },
         );
 
@@ -286,6 +338,7 @@ mod tests {
             &mut app,
             Benchmark {
                 duration: Duration::from_secs(1),
+                reports: None,
             },
         );
 

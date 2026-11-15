@@ -7,6 +7,7 @@ mod gpu_passes;
 mod presentation;
 mod quality;
 mod render_scale;
+mod report;
 mod scale_controller;
 mod targets;
 

@@ -1,5 +1,6 @@
 use std::env;
 use std::net::SocketAddr;
+use std::path::PathBuf;
 use std::time::Duration;
 
 use anyhow::{Context, Result};
@@ -17,6 +18,7 @@ use vespera_render::{
 };
 
 const DEFAULT_SERVER: &str = "127.0.0.1:5000";
+const BENCHMARK_REPORTS: &str = "benchmarks";
 
 fn main() -> AppExit {
     match run() {
@@ -82,5 +84,6 @@ fn benchmark_from_environment() -> Result<Option<Benchmark>> {
         .context("VESPERA_BENCHMARK_SECONDS is not a whole number of seconds")?;
     Ok(Some(Benchmark {
         duration: Duration::from_secs(seconds),
+        reports: Some(PathBuf::from(BENCHMARK_REPORTS)),
     }))
 }
