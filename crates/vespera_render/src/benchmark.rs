@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use bevy::diagnostic::DiagnosticsStore;
 use bevy::prelude::*;
+use bevy::render::diagnostic::RenderDiagnosticsPlugin;
 use bevy::window::{MonitorSelection, PresentMode, WindowMode};
 use bevy::winit::WinitSettings;
 use vespera_client::LocalPlayer;
@@ -14,6 +15,16 @@ pub struct Benchmark {
 }
 
 pub struct BenchmarkPlugin;
+
+/// Enables the benchmark and the GPU timers of the render passes.
+///
+/// With the `tracing-tracy` feature, the render plugin of Bevy adds the GPU timers. Thus, this function adds them only when they are not in the app.
+pub fn enable_benchmark(app: &mut App, benchmark: Benchmark) {
+    app.insert_resource(benchmark);
+    if !app.is_plugin_added::<RenderDiagnosticsPlugin>() {
+        app.add_plugins(RenderDiagnosticsPlugin);
+    }
+}
 
 #[derive(Default)]
 struct Recording {
@@ -78,12 +89,13 @@ mod tests {
     use std::time::Duration;
 
     use bevy::prelude::*;
+    use bevy::render::diagnostic::RenderDiagnosticsPlugin;
     use bevy::time::TimeUpdateStrategy;
     use bevy::window::{MonitorSelection, PresentMode, WindowMode};
     use bevy::winit::{UpdateMode, WinitSettings};
     use vespera_client::LocalPlayer;
 
-    use super::{Benchmark, BenchmarkPlugin};
+    use super::{Benchmark, BenchmarkPlugin, enable_benchmark};
 
     const FRAME: Duration = Duration::from_millis(20);
 
@@ -179,6 +191,36 @@ mod tests {
             modes,
             Some((UpdateMode::Continuous, UpdateMode::Continuous))
         );
+    }
+
+    #[test]
+    fn the_benchmark_measures_the_render_passes_on_the_gpu() {
+        let mut app = App::new();
+
+        enable_benchmark(
+            &mut app,
+            Benchmark {
+                duration: Duration::from_secs(1),
+            },
+        );
+
+        assert!(app.is_plugin_added::<RenderDiagnosticsPlugin>());
+        assert!(app.world().contains_resource::<Benchmark>());
+    }
+
+    #[test]
+    fn the_benchmark_keeps_the_gpu_timers_that_the_render_plugin_added() {
+        let mut app = App::new();
+        app.add_plugins(RenderDiagnosticsPlugin);
+
+        enable_benchmark(
+            &mut app,
+            Benchmark {
+                duration: Duration::from_secs(1),
+            },
+        );
+
+        assert!(app.world().contains_resource::<Benchmark>());
     }
 
     #[test]

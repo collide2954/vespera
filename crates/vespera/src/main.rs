@@ -6,15 +6,14 @@ use anyhow::{Context, Result};
 use bevy::DefaultPlugins;
 use bevy::app::{App, AppExit, PluginGroup};
 use bevy::render::RenderPlugin;
-use bevy::render::diagnostic::RenderDiagnosticsPlugin;
 use bevy::render::settings::{Backends, Dx12Compiler, WgpuSettings};
 use bevy::utils::default;
 use bevy::window::{Window, WindowPlugin};
 use bevy_replicon_renet::RepliconRenetClientPlugin;
 use vespera_client::{ClientLogicPlugins, connect};
 use vespera_render::{
-    Benchmark, BenchmarkPlugin, DXC_LIBRARY, PresentationPlugin, dxc_next_to, render_backends,
-    shader_compiler,
+    Benchmark, BenchmarkPlugin, DXC_LIBRARY, PresentationPlugin, dxc_next_to, enable_benchmark,
+    render_backends, shader_compiler,
 };
 
 const DEFAULT_SERVER: &str = "127.0.0.1:5000";
@@ -68,8 +67,7 @@ fn run() -> Result<AppExit> {
         BenchmarkPlugin,
     ));
     if let Some(benchmark) = benchmark {
-        app.insert_resource(benchmark)
-            .add_plugins(RenderDiagnosticsPlugin);
+        enable_benchmark(&mut app, benchmark);
     }
     connect(&mut app, server)?;
     Ok(app.run())

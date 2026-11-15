@@ -11,7 +11,7 @@ mod scale_controller;
 mod targets;
 
 pub use backends::{DXC_LIBRARY, dxc_next_to, render_backends, shader_compiler};
-pub use benchmark::{Benchmark, BenchmarkPlugin};
+pub use benchmark::{Benchmark, BenchmarkPlugin, enable_benchmark};
 pub use camera::{CAMERA_OFFSET, follow_camera};
 pub use controls::{MoveKey, move_direction};
 pub use frame_times::{FrameSummary, FrameTimes};
