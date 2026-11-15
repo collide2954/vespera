@@ -1,8 +1,11 @@
 import json
+import os
 import sys
+import tomllib
 
 import bpy
 
+import bl_ext.blender_org.mpfb as mpfb
 from bl_ext.blender_org.mpfb.services.assetservice import AssetService
 from bl_ext.blender_org.mpfb.services.humanservice import HumanService
 from bl_ext.blender_org.mpfb.services.meshservice import MeshService
@@ -10,6 +13,15 @@ from bl_ext.blender_org.mpfb.services.objectservice import ObjectService
 from bl_ext.blender_org.mpfb.services.targetservice import TargetService
 
 RIG = "game_engine"
+MPFB_VERSION = "2.0.18"
+
+
+def check_mpfb():
+    manifest = os.path.join(os.path.dirname(mpfb.__file__), "blender_manifest.toml")
+    with open(manifest, "rb") as manifest_file:
+        version = tomllib.load(manifest_file)["version"]
+    if version != MPFB_VERSION:
+        raise SystemExit(f"error: the import step uses MPFB {MPFB_VERSION}, but Blender has MPFB {version}")
 
 
 def asset_path(subdir, kind, label):
@@ -50,6 +62,8 @@ def build(recipe):
         bpy.data.objects.remove(obj, do_unlink=True)
     macro = TargetService.get_default_macro_info_dict()
     for key, value in recipe["shape"].items():
+        if not isinstance(macro.get(key), float):
+            raise SystemExit(f"error: MPFB has no shape value with the name {key}")
         macro[key] = value
     basemesh = HumanService.create_human(
         mask_helpers=True,
@@ -106,6 +120,7 @@ def main():
     recipe_path, blend_path = arguments[0], arguments[1]
     with open(recipe_path, encoding="utf-8-sig") as recipe_file:
         recipe = json.load(recipe_file)
+    check_mpfb()
     rig, height = build(recipe)
     bpy.ops.wm.save_as_mainfile(filepath=blend_path)
     print(f"HUMAN height {height:.3f} m, triangles {triangle_count()}, bones {len(rig.data.bones)}")
