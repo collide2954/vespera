@@ -8,7 +8,7 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
-bevy = { workspace = true, features = ["3d"] }
+bevy = { workspace = true, features = ["3d", "bevy_sprite_render"] }
 vespera_client.workspace = true
 vespera_core.workspace = true
 vespera_motion.workspace = true

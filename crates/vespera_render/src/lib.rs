@@ -5,6 +5,7 @@ mod controls;
 mod frame_times;
 mod presentation;
 mod quality;
+mod render_scale;
 mod targets;
 
 pub use backends::{DXC_LIBRARY, dxc_next_to, render_backends, shader_compiler};
@@ -14,4 +15,5 @@ pub use controls::{MoveKey, move_direction};
 pub use frame_times::{FrameSummary, FrameTimes};
 pub use presentation::PresentationPlugin;
 pub use quality::Quality;
+pub use render_scale::{RenderScale, RenderScalePlugin, SceneView, scene_image, scene_size};
 pub use targets::nearest_in_reach;

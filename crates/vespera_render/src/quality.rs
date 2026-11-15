@@ -11,6 +11,8 @@ pub struct Quality {
     pub shadow_map_size: usize,
     pub first_cascade_distance: f32,
     pub shadow_distance: f32,
+    pub min_render_scale: f32,
+    pub max_render_scale: f32,
 }
 
 impl Quality {
@@ -21,16 +23,18 @@ impl Quality {
         shadow_map_size: 1024,
         first_cascade_distance: 15.0,
         shadow_distance: 60.0,
+        min_render_scale: 0.67,
+        max_render_scale: 1.0,
     };
 
     #[must_use]
-    pub fn camera(&self) -> impl Bundle {
-        (
-            self.msaa,
-            Fxaa::default(),
-            ContrastAdaptiveSharpening::default(),
-            self.shadow_filter,
-        )
+    pub fn scene_camera(&self) -> impl Bundle {
+        (self.msaa, Fxaa::default(), self.shadow_filter)
+    }
+
+    #[must_use]
+    pub fn screen_camera(&self) -> impl Bundle {
+        (self.msaa, ContrastAdaptiveSharpening::default())
     }
 
     #[must_use]
@@ -59,16 +63,27 @@ mod tests {
         assert_eq!(Quality::LOW.msaa, Msaa::Off);
         assert_eq!(Quality::LOW.shadow_cascades, 2);
         assert_eq!(Quality::LOW.shadow_map_size, 1024);
+        assert!((Quality::LOW.min_render_scale - 0.67).abs() < 1e-6);
+        assert!((Quality::LOW.max_render_scale - 1.0).abs() < 1e-6);
     }
 
     #[test]
-    fn a_low_camera_uses_fxaa_and_sharpening_without_msaa() {
+    fn a_low_scene_camera_uses_fxaa_without_msaa() {
         let mut world = World::new();
 
-        let camera = world.spawn(Quality::LOW.camera()).id();
+        let camera = world.spawn(Quality::LOW.scene_camera()).id();
 
         assert_eq!(world.get::<Msaa>(camera), Some(&Msaa::Off));
         assert!(world.get::<Fxaa>(camera).is_some_and(|fxaa| fxaa.enabled));
+    }
+
+    #[test]
+    fn a_low_screen_camera_sharpens_the_scaled_scene_without_msaa() {
+        let mut world = World::new();
+
+        let camera = world.spawn(Quality::LOW.screen_camera()).id();
+
+        assert_eq!(world.get::<Msaa>(camera), Some(&Msaa::Off));
         assert!(
             world
                 .get::<ContrastAdaptiveSharpening>(camera)
@@ -77,10 +92,10 @@ mod tests {
     }
 
     #[test]
-    fn a_low_camera_uses_the_hardware_2x2_shadow_filter() {
+    fn a_low_scene_camera_uses_the_hardware_2x2_shadow_filter() {
         let mut world = World::new();
 
-        let camera = world.spawn(Quality::LOW.camera()).id();
+        let camera = world.spawn(Quality::LOW.scene_camera()).id();
 
         assert_eq!(
             world.get::<ShadowFilteringMethod>(camera),

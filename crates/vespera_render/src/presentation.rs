@@ -1,3 +1,4 @@
+use bevy::camera::RenderTarget;
 use bevy::light::DirectionalLightShadowMap;
 use bevy::prelude::*;
 use vespera_client::{LocalMoveInput, LocalPlayer, Prediction};
@@ -6,7 +7,10 @@ use vespera_motion::MoveInput;
 use vespera_protocol::{Character, InteractIntent};
 use vespera_rules::woodcutting::{Felled, REACH, Tree};
 
-use crate::{MoveKey, Quality, follow_camera, move_direction, nearest_in_reach};
+use crate::{
+    MoveKey, Quality, RenderScalePlugin, SceneView, follow_camera, move_direction,
+    nearest_in_reach, scene_image,
+};
 
 const MOVE_KEYS: [(KeyCode, MoveKey); 4] = [
     (KeyCode::KeyW, MoveKey::Forward),
@@ -36,7 +40,8 @@ struct Looks {
 
 impl Plugin for PresentationPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(ClearColor(Color::srgb(0.20, 0.16, 0.30)))
+        app.add_plugins(RenderScalePlugin)
+            .insert_resource(ClearColor(Color::srgb(0.20, 0.16, 0.30)))
             .insert_resource(GlobalAmbientLight {
                 color: Color::srgb(0.55, 0.50, 0.75),
                 brightness: AMBIENT_BRIGHTNESS,
@@ -91,12 +96,24 @@ fn spawn_scene(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut images: ResMut<Assets<Image>>,
 ) {
+    let scene = images.add(scene_image());
     commands.spawn((
         Camera3d::default(),
-        Quality::LOW.camera(),
+        RenderTarget::from(scene.clone()),
+        Quality::LOW.scene_camera(),
         follow_camera(Vec3::ZERO),
     ));
+    commands.spawn((
+        Camera2d,
+        Camera {
+            order: 1,
+            ..default()
+        },
+        Quality::LOW.screen_camera(),
+    ));
+    commands.spawn((Sprite::from_image(scene), SceneView));
     commands.spawn((
         DirectionalLight {
             color: Color::srgb(1.0, 0.78, 0.58),
@@ -218,11 +235,47 @@ fn follow_local_player(
 
 #[cfg(test)]
 mod tests {
-    use bevy::math::Vec3;
+    use bevy::camera::RenderTarget;
+    use bevy::ecs::system::RunSystemOnce;
+    use bevy::prelude::*;
 
     use super::{
-        CHARACTER_HEIGHT, STUMP_SCALE, TRUNK_HEIGHT, character_translation, tree_transform,
+        CHARACTER_HEIGHT, STUMP_SCALE, TRUNK_HEIGHT, character_translation, spawn_scene,
+        tree_transform,
     };
+    use crate::SceneView;
+
+    #[test]
+    fn the_screen_shows_the_image_that_the_scene_camera_renders() {
+        let mut world = World::new();
+        world.init_resource::<Assets<Mesh>>();
+        world.init_resource::<Assets<StandardMaterial>>();
+        world.init_resource::<Assets<Image>>();
+
+        world
+            .run_system_once(spawn_scene)
+            .expect("the scene spawns");
+
+        let (scene_image, scene_order) = world
+            .query_filtered::<(&RenderTarget, &Camera), With<Camera3d>>()
+            .single(&world)
+            .map(|(target, camera)| (target.as_image().cloned(), camera.order))
+            .expect("one scene camera");
+        let (screen_shows_window, screen_order) = world
+            .query_filtered::<(&RenderTarget, &Camera), With<Camera2d>>()
+            .single(&world)
+            .map(|(target, camera)| (matches!(target, RenderTarget::Window(_)), camera.order))
+            .expect("one screen camera");
+        let view_image = world
+            .query_filtered::<&Sprite, With<SceneView>>()
+            .single(&world)
+            .map(|sprite| sprite.image.clone())
+            .expect("one scene view");
+
+        assert_eq!(scene_image, Some(view_image));
+        assert!(screen_shows_window);
+        assert!(screen_order > scene_order);
+    }
 
     #[test]
     fn a_character_stands_on_the_ground() {
