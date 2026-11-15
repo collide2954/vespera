@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
+use bevy::window::{MonitorSelection, PresentMode, WindowMode};
 use vespera_client::LocalPlayer;
 
 use crate::FrameTimes;
@@ -21,7 +22,18 @@ struct Recording {
 
 impl Plugin for BenchmarkPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, record_frames.run_if(resource_exists::<Benchmark>));
+        app.add_systems(
+            Startup,
+            prepare_windows.run_if(resource_exists::<Benchmark>),
+        )
+        .add_systems(Update, record_frames.run_if(resource_exists::<Benchmark>));
+    }
+}
+
+fn prepare_windows(mut windows: Query<&mut Window>) {
+    for mut window in &mut windows {
+        window.present_mode = PresentMode::AutoNoVsync;
+        window.mode = WindowMode::BorderlessFullscreen(MonitorSelection::Current);
     }
 }
 
@@ -56,6 +68,7 @@ mod tests {
 
     use bevy::prelude::*;
     use bevy::time::TimeUpdateStrategy;
+    use bevy::window::{MonitorSelection, PresentMode, WindowMode};
     use vespera_client::LocalPlayer;
 
     use super::{Benchmark, BenchmarkPlugin};
@@ -111,5 +124,42 @@ mod tests {
         let mut app = app(None, true);
 
         assert_eq!(run(&mut app, 100), None);
+    }
+
+    fn window_after_start(benchmark: Option<Duration>) -> Option<(PresentMode, WindowMode)> {
+        let mut app = app(benchmark, true);
+        let window = app.world_mut().spawn(Window::default()).id();
+
+        app.update();
+
+        app.world()
+            .get::<Window>(window)
+            .map(|window| (window.present_mode, window.mode))
+    }
+
+    #[test]
+    fn the_benchmark_turns_off_vsync_to_measure_more_than_the_display_shows() {
+        assert_eq!(
+            window_after_start(Some(Duration::from_secs(1))).map(|(present, _)| present),
+            Some(PresentMode::AutoNoVsync)
+        );
+    }
+
+    #[test]
+    fn the_benchmark_measures_on_the_full_screen() {
+        assert_eq!(
+            window_after_start(Some(Duration::from_secs(1))).map(|(_, mode)| mode),
+            Some(WindowMode::BorderlessFullscreen(MonitorSelection::Current))
+        );
+    }
+
+    #[test]
+    fn without_a_benchmark_the_window_does_not_change() {
+        let window = Window::default();
+
+        assert_eq!(
+            window_after_start(None),
+            Some((window.present_mode, window.mode))
+        );
     }
 }
