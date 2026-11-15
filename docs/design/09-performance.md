@@ -65,7 +65,8 @@ The GPU budget has a total of 14 ms. The remaining 2.7 ms is a reserve.
 - Use Bevy forward rendering with the Vespera material. On Low, the material uses few texture samples and a simple light model.
 - Do not use MSAA. Use SMAA or FXAA, then contrast adaptive sharpening (CAS).
 - Render the 3D scene at the dynamic render scale. Render the UI at the full output resolution.
-- The scene camera renders into an image at the render scale and applies FXAA. The screen camera shows the image in the window with bilinear filtering and applies CAS. The UI renders on the screen camera.
+- The scene camera renders into an image at the render scale and applies FXAA, then CAS. The screen camera shows the image in the window with bilinear filtering. The UI renders on the screen camera.
+- Do not apply CAS at the output resolution on Low. On the reference computer, CAS at 1920 × 1080 took 2.1 to 2.7 ms of each frame.
 - Do not use the main pass resolution override of Bevy. The light clusters of Bevy do not use the override. Thus, point lights and spot lights go into incorrect clusters.
 - Use 2 shadow cascades at 1024 × 1024, up to 60 m, with the hardware 2 × 2 shadow filter. Contact shadows are off.
 - Use distance fog and height fog. Volumetric fog is only for the High and Ultra presets.

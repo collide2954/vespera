@@ -29,12 +29,17 @@ impl Quality {
 
     #[must_use]
     pub fn scene_camera(&self) -> impl Bundle {
-        (self.msaa, Fxaa::default(), self.shadow_filter)
+        (
+            self.msaa,
+            Fxaa::default(),
+            ContrastAdaptiveSharpening::default(),
+            self.shadow_filter,
+        )
     }
 
     #[must_use]
     pub fn screen_camera(&self) -> impl Bundle {
-        (self.msaa, ContrastAdaptiveSharpening::default())
+        self.msaa
     }
 
     #[must_use]
@@ -68,27 +73,29 @@ mod tests {
     }
 
     #[test]
-    fn a_low_scene_camera_uses_fxaa_without_msaa() {
+    fn a_low_scene_camera_uses_fxaa_and_sharpening_without_msaa() {
         let mut world = World::new();
 
         let camera = world.spawn(Quality::LOW.scene_camera()).id();
 
         assert_eq!(world.get::<Msaa>(camera), Some(&Msaa::Off));
         assert!(world.get::<Fxaa>(camera).is_some_and(|fxaa| fxaa.enabled));
-    }
-
-    #[test]
-    fn a_low_screen_camera_sharpens_the_scaled_scene_without_msaa() {
-        let mut world = World::new();
-
-        let camera = world.spawn(Quality::LOW.screen_camera()).id();
-
-        assert_eq!(world.get::<Msaa>(camera), Some(&Msaa::Off));
         assert!(
             world
                 .get::<ContrastAdaptiveSharpening>(camera)
                 .is_some_and(|sharpening| sharpening.enabled)
         );
+    }
+
+    #[test]
+    fn a_low_screen_camera_only_scales_the_scene_up() {
+        let mut world = World::new();
+
+        let camera = world.spawn(Quality::LOW.screen_camera()).id();
+
+        assert_eq!(world.get::<Msaa>(camera), Some(&Msaa::Off));
+        assert!(world.get::<ContrastAdaptiveSharpening>(camera).is_none());
+        assert!(world.get::<Fxaa>(camera).is_none());
     }
 
     #[test]
