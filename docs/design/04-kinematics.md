@@ -20,6 +20,8 @@ Bodies must move with weight, balance and intent. These rules apply to all chara
 | Bird rig | Birds |
 | Spirit rig | Spirits. The rig has few bones. Shaders and particles make most of the motion. |
 
+The Vespera human rig is the `game_engine` rig of MPFB. It has 53 bones, with fingers and without face bones. Thus facial animation must use a different method later.
+
 One file maps the bone names of each rig to Vespera joint names. All code uses the Vespera joint names. An asset test makes sure that each model contains all joints of its rig.
 
 ## 4.3 Animation layers

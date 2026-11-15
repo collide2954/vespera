@@ -78,6 +78,7 @@ The git repository is text-only. All binary files are in the asset store.
    - It retargets all animation clips to the Vespera human rig.
    - It applies the tint masks.
    - It makes LOD meshes with meshoptimizer.
+   - It simplifies the meshes of MakeHuman humans to the triangle budget for LOD 0. A MakeHuman body alone has approximately 27,000 triangles. The source files keep the full detail.
    - It compresses the textures to BCn with mipmaps.
 3. Runtime bundle. The import step writes the processed files to a runtime archive. The client and the server load only runtime files.
 
