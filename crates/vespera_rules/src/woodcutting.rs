@@ -73,8 +73,8 @@ fn start_chopping(
         let Some(definition) = content.tree(&tree.0) else {
             continue;
         };
-        let in_reach = position.0.distance(tree_position.0) <= REACH;
-        if in_reach && skills.level(Skill::Woodcutting) >= definition.level {
+        if in_reach(position, tree_position) && skills.level(Skill::Woodcutting) >= definition.level
+        {
             commands.entity(request.woodcutter).insert(Chopping {
                 tree: request.tree,
                 seconds: 0.0,
@@ -83,20 +83,25 @@ fn start_chopping(
     }
 }
 
+fn in_reach(woodcutter: &Position, tree: &Position) -> bool {
+    woodcutter.0.distance(tree.0) <= REACH
+}
+
 fn chop(
     time: Res<Time>,
     content: Res<Content>,
     mut commands: Commands,
-    mut woodcutters: Query<(Entity, &mut Chopping, &mut Pack, &mut Skills)>,
-    mut trees: Query<(&Tree, &mut LogsLeft), Without<Felled>>,
+    mut woodcutters: Query<(Entity, &Position, &mut Chopping, &mut Pack, &mut Skills)>,
+    mut trees: Query<(&Tree, &Position, &mut LogsLeft), Without<Felled>>,
 ) {
-    for (woodcutter, mut chopping, mut pack, mut skills) in &mut woodcutters {
+    for (woodcutter, position, mut chopping, mut pack, mut skills) in &mut woodcutters {
         let tree = chopping.tree;
-        let Ok((kind, mut logs_left)) = trees.get_mut(tree) else {
+        let Ok((kind, tree_position, mut logs_left)) = trees.get_mut(tree) else {
             commands.entity(woodcutter).remove::<Chopping>();
             continue;
         };
-        let Some(definition) = content.tree(&kind.0).filter(|_| logs_left.0 > 0) else {
+        let can_chop = in_reach(position, tree_position) && logs_left.0 > 0;
+        let Some(definition) = content.tree(&kind.0).filter(|_| can_chop) else {
             commands.entity(woodcutter).remove::<Chopping>();
             continue;
         };
@@ -309,6 +314,24 @@ mod tests {
         let mut scene = Scene::new(1, Vec3::new(10.0, 0.0, 0.0));
         scene.chop();
 
+        scene.run_for(3.1);
+
+        assert_eq!(scene.logs(), 0);
+        assert!(!scene.is_chopping());
+    }
+
+    #[test]
+    fn a_woodcutter_who_walks_out_of_reach_stops_chopping() {
+        let mut scene = Scene::new(1, Vec3::ZERO);
+        scene.chop();
+        scene.run_for(1.0);
+
+        scene
+            .app
+            .world_mut()
+            .get_mut::<Position>(scene.woodcutter)
+            .unwrap()
+            .0 = Vec3::new(10.0, 0.0, 0.0);
         scene.run_for(3.1);
 
         assert_eq!(scene.logs(), 0);

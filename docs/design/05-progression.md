@@ -42,6 +42,8 @@ Gathering skills:
 | Foraging | Collect herbs, fibers and mushrooms |
 | Hunting | Track and trap animals, and tame creatures |
 
+A gathering action continues until the resource is empty or the pack is full. The action stops when the player moves out of reach of the resource. To continue, the player starts the action again.
+
 Artisan skills:
 
 | Skill | Description |
