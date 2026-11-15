@@ -105,6 +105,8 @@ The dynamic render scale has 5 steps from the minimum to the maximum of the pres
 - `cargo xtask bench` starts the client in benchmark mode. The camera follows a fixed path through the test valley at dusk, with 100 bot characters.
 - The client starts in benchmark mode when the `VESPERA_BENCHMARK_SECONDS` variable is set. It starts to record frames when the client controls its character.
 - In benchmark mode, the client uses the full screen without vsync. Thus, the frame times show the work of the computer and not the refresh rate of the display.
+- In benchmark mode, GPU timers measure each render pass. The timers decrease the frame rate by approximately 5%.
+- The reference computer becomes slower when it is hot. Thus, compare two changes with runs one after the other, not with old results.
 - Measure on mains power. On battery, the reference computer limits the GPU clock.
 - The benchmark records these values:
   - The frame times: p50, p95, p99 and 1% low.

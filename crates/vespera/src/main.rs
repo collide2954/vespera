@@ -6,6 +6,7 @@ use anyhow::{Context, Result};
 use bevy::DefaultPlugins;
 use bevy::app::{App, AppExit, PluginGroup};
 use bevy::render::RenderPlugin;
+use bevy::render::diagnostic::RenderDiagnosticsPlugin;
 use bevy::render::settings::{Backends, Dx12Compiler, WgpuSettings};
 use bevy::utils::default;
 use bevy::window::{Window, WindowPlugin};
@@ -67,7 +68,8 @@ fn run() -> Result<AppExit> {
         BenchmarkPlugin,
     ));
     if let Some(benchmark) = benchmark {
-        app.insert_resource(benchmark);
+        app.insert_resource(benchmark)
+            .add_plugins(RenderDiagnosticsPlugin);
     }
     connect(&mut app, server)?;
     Ok(app.run())

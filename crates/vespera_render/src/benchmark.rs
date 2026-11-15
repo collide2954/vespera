@@ -1,10 +1,11 @@
 use std::time::Duration;
 
+use bevy::diagnostic::DiagnosticsStore;
 use bevy::prelude::*;
 use bevy::window::{MonitorSelection, PresentMode, WindowMode};
 use vespera_client::LocalPlayer;
 
-use crate::FrameTimes;
+use crate::{FrameTimes, GpuPassTimes};
 
 #[derive(Resource, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Benchmark {
@@ -18,6 +19,7 @@ struct Recording {
     started: bool,
     elapsed: Duration,
     times: FrameTimes,
+    passes: GpuPassTimes,
 }
 
 impl Plugin for BenchmarkPlugin {
@@ -41,6 +43,7 @@ fn record_frames(
     time: Res<Time<Real>>,
     benchmark: Res<Benchmark>,
     players: Query<(), With<LocalPlayer>>,
+    diagnostics: Option<Res<DiagnosticsStore>>,
     mut recording: Local<Recording>,
     mut exit: MessageWriter<AppExit>,
 ) {
@@ -54,9 +57,15 @@ fn record_frames(
     let delta = time.delta();
     recording.times.record(delta.as_secs_f32());
     recording.elapsed += delta;
+    if let Some(diagnostics) = &diagnostics {
+        recording.passes.record(diagnostics);
+    }
     if recording.elapsed >= benchmark.duration {
         if let Some(summary) = recording.times.summary() {
             info!("benchmark: {summary}");
+        }
+        if let Some(passes) = recording.passes.summary() {
+            info!("benchmark: {passes}");
         }
         exit.write(AppExit::Success);
     }
