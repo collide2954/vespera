@@ -1,6 +1,8 @@
 use bevy::camera::RenderTarget;
 use bevy::light::DirectionalLightShadowMap;
+use bevy::light::cluster::GlobalClusterSettings;
 use bevy::prelude::*;
+use bevy::render::view::NoIndirectDrawing;
 use vespera_client::{LocalMoveInput, LocalPlayer, Prediction};
 use vespera_core::Position;
 use vespera_motion::MoveInput;
@@ -50,7 +52,10 @@ impl Plugin for PresentationPlugin {
             .insert_resource(DirectionalLightShadowMap {
                 size: Quality::LOW.shadow_map_size,
             })
-            .add_systems(Startup, (prepare_looks, spawn_scene))
+            .add_systems(
+                Startup,
+                (prepare_looks, spawn_scene, choose_light_clustering),
+            )
             .add_systems(
                 Update,
                 (
@@ -99,12 +104,14 @@ fn spawn_scene(
     mut images: ResMut<Assets<Image>>,
 ) {
     let scene = images.add(scene_image());
-    commands.spawn((
-        Camera3d::default(),
-        RenderTarget::from(scene.clone()),
-        Quality::LOW.scene_camera(),
-        follow_camera(Vec3::ZERO),
-    ));
+    commands
+        .spawn((
+            Camera3d::default(),
+            RenderTarget::from(scene.clone()),
+            Quality::LOW.scene_camera(),
+            follow_camera(Vec3::ZERO),
+        ))
+        .insert_if(NoIndirectDrawing, || !Quality::LOW.indirect_drawing);
     commands.spawn((
         Camera2d,
         Camera {
@@ -128,6 +135,14 @@ fn spawn_scene(
         Mesh3d(meshes.add(Plane3d::default().mesh().size(GROUND_SIZE, GROUND_SIZE))),
         MeshMaterial3d(materials.add(Color::srgb(0.24, 0.36, 0.20))),
     ));
+}
+
+fn choose_light_clustering(settings: Option<ResMut<GlobalClusterSettings>>) {
+    if let Some(mut settings) = settings
+        && !Quality::LOW.gpu_light_clustering
+    {
+        settings.gpu_clustering = None;
+    }
 }
 
 fn dress_characters(
@@ -237,24 +252,30 @@ fn follow_local_player(
 mod tests {
     use bevy::camera::RenderTarget;
     use bevy::ecs::system::RunSystemOnce;
+    use bevy::light::cluster::{GlobalClusterGpuSettings, GlobalClusterSettings};
     use bevy::prelude::*;
+    use bevy::render::view::NoIndirectDrawing;
 
     use super::{
-        CHARACTER_HEIGHT, STUMP_SCALE, TRUNK_HEIGHT, character_translation, spawn_scene,
-        tree_transform,
+        CHARACTER_HEIGHT, STUMP_SCALE, TRUNK_HEIGHT, character_translation,
+        choose_light_clustering, spawn_scene, tree_transform,
     };
     use crate::SceneView;
 
-    #[test]
-    fn the_screen_shows_the_image_that_the_scene_camera_renders() {
+    fn world_with_scene() -> World {
         let mut world = World::new();
         world.init_resource::<Assets<Mesh>>();
         world.init_resource::<Assets<StandardMaterial>>();
         world.init_resource::<Assets<Image>>();
-
         world
             .run_system_once(spawn_scene)
             .expect("the scene spawns");
+        world
+    }
+
+    #[test]
+    fn the_screen_shows_the_image_that_the_scene_camera_renders() {
+        let mut world = world_with_scene();
 
         let (scene_image, scene_order) = world
             .query_filtered::<(&RenderTarget, &Camera), With<Camera3d>>()
@@ -275,6 +296,53 @@ mod tests {
         assert_eq!(scene_image, Some(view_image));
         assert!(screen_shows_window);
         assert!(screen_order > scene_order);
+    }
+
+    #[test]
+    fn on_low_the_scene_camera_draws_without_indirect_draws() {
+        let mut world = world_with_scene();
+
+        let draws_directly = world
+            .query_filtered::<Has<NoIndirectDrawing>, With<Camera3d>>()
+            .single(&world)
+            .expect("one scene camera");
+
+        assert!(draws_directly);
+    }
+
+    #[test]
+    fn on_low_the_lights_are_clustered_on_the_cpu() {
+        let mut world = World::new();
+        world.insert_resource(GlobalClusterSettings {
+            supports_storage_buffers: true,
+            clustered_decals_are_usable: false,
+            gpu_clustering: Some(GlobalClusterGpuSettings {
+                initial_z_slice_list_capacity: 1,
+                initial_index_list_capacity: 1,
+            }),
+            max_uniform_buffer_clusterable_objects: 1,
+            view_cluster_bindings_max_indices: 1,
+        });
+
+        world
+            .run_system_once(choose_light_clustering)
+            .expect("the system runs");
+
+        assert!(
+            world
+                .resource::<GlobalClusterSettings>()
+                .gpu_clustering
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn without_cluster_settings_the_light_clustering_choice_does_nothing() {
+        let mut world = World::new();
+
+        let result = world.run_system_once(choose_light_clustering);
+
+        assert!(result.is_ok());
     }
 
     #[test]

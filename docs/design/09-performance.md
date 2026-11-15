@@ -68,6 +68,8 @@ The GPU budget has a total of 14 ms. The remaining 2.7 ms is a reserve.
 - The scene camera renders into an image at the render scale and applies FXAA, then CAS. The screen camera shows the image in the window with bilinear filtering. The UI renders on the screen camera.
 - Do not apply CAS at the output resolution on Low. On the reference computer, CAS at 1920 × 1080 took 2.1 to 2.7 ms of each frame.
 - Do not use the main pass resolution override of Bevy. The light clusters of Bevy do not use the override. Thus, point lights and spot lights go into incorrect clusters.
+- On Low, the scene camera does not use indirect draws. The indirect draws of Bevy add many preparation steps on the render thread in each frame. On the reference computer, direct draws gave the same image at an approximately 20% higher frame rate. Do not turn off the GPU instance buffer builder of Bevy for this purpose. With Bevy 0.20.1, the main pass then did not draw the meshes.
+- On Low, cluster the lights on the CPU. GPU clustering adds a compute pass, and work on the render thread, in each frame. With few point lights, CPU clustering takes almost no time.
 - Use 2 shadow cascades at 1024 × 1024, up to 60 m, with the hardware 2 × 2 shadow filter. Contact shadows are off.
 - Use distance fog and height fog. Volumetric fog is only for the High and Ultra presets.
 - Update the sky at a low rate, not in each frame.

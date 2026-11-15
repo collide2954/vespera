@@ -13,6 +13,8 @@ pub struct Quality {
     pub shadow_distance: f32,
     pub min_render_scale: f32,
     pub max_render_scale: f32,
+    pub indirect_drawing: bool,
+    pub gpu_light_clustering: bool,
 }
 
 impl Quality {
@@ -25,6 +27,8 @@ impl Quality {
         shadow_distance: 60.0,
         min_render_scale: 0.67,
         max_render_scale: 1.0,
+        indirect_drawing: false,
+        gpu_light_clustering: false,
     };
 
     #[must_use]
@@ -70,6 +74,8 @@ mod tests {
         assert_eq!(Quality::LOW.shadow_map_size, 1024);
         assert!((Quality::LOW.min_render_scale - 0.67).abs() < 1e-6);
         assert!((Quality::LOW.max_render_scale - 1.0).abs() < 1e-6);
+        assert!(!Quality::LOW.indirect_drawing);
+        assert!(!Quality::LOW.gpu_light_clustering);
     }
 
     #[test]
