@@ -290,6 +290,7 @@ def main():
     for pose_bone in target.pose.bones:
         pose_bone.rotation_quaternion = Quaternion()
         pose_bone.location = Vector()
+    target.matrix_world = Matrix.Rotation(math.pi, 4, "Z") @ target.matrix_world
     bpy.ops.export_scene.gltf(filepath=glb_path, export_format="GLB", use_selection=False, export_apply=True,
                               export_skins=True, export_animations=True, export_animation_mode="NLA_TRACKS",
                               export_yup=True)
