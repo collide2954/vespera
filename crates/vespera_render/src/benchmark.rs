@@ -1,8 +1,12 @@
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
 use bevy::diagnostic::DiagnosticsStore;
 use bevy::prelude::*;
 use bevy::render::diagnostic::RenderDiagnosticsPlugin;
+use bevy::render::render_resource::PipelineCache;
+use bevy::render::{Render, RenderApp, RenderSystems};
 use bevy::window::{MonitorSelection, PresentMode, WindowMode};
 use bevy::winit::WinitSettings;
 use vespera_client::LocalPlayer;
@@ -16,18 +20,50 @@ pub struct Benchmark {
 
 pub struct BenchmarkPlugin;
 
+const READY_FRAMES: u32 = 30;
+
+#[derive(Resource, Clone)]
+struct PipelinesReady(Arc<AtomicBool>);
+
+impl PipelinesReady {
+    fn new(ready: bool) -> Self {
+        Self(Arc::new(AtomicBool::new(ready)))
+    }
+
+    fn get(&self) -> bool {
+        self.0.load(Ordering::Relaxed)
+    }
+
+    fn set(&self, ready: bool) {
+        self.0.store(ready, Ordering::Relaxed);
+    }
+}
+
 /// Enables the benchmark and the GPU timers of the render passes.
 ///
-/// With the `tracing-tracy` feature, the render plugin of Bevy adds the GPU timers. Thus, this function adds them only when they are not in the app.
+/// The benchmark starts to record frames when no shader pipeline waits for compilation. With the `tracing-tracy` feature, the render plugin of Bevy adds the GPU timers. Thus, this function adds them only when they are not in the app.
 pub fn enable_benchmark(app: &mut App, benchmark: Benchmark) {
-    app.insert_resource(benchmark);
+    let pipelines = PipelinesReady::new(false);
+    app.insert_resource(benchmark)
+        .insert_resource(pipelines.clone());
+    if let Some(render_app) = app.get_sub_app_mut(RenderApp) {
+        render_app.insert_resource(pipelines).add_systems(
+            Render,
+            report_pipeline_readiness.in_set(RenderSystems::Cleanup),
+        );
+    }
     if !app.is_plugin_added::<RenderDiagnosticsPlugin>() {
         app.add_plugins(RenderDiagnosticsPlugin);
     }
 }
 
+fn report_pipeline_readiness(cache: Res<PipelineCache>, pipelines: Res<PipelinesReady>) {
+    pipelines.set(cache.waiting_pipelines().next().is_none());
+}
+
 #[derive(Default)]
 struct Recording {
+    ready_frames: u32,
     started: bool,
     elapsed: Duration,
     times: FrameTimes,
@@ -56,6 +92,7 @@ fn record_frames(
     time: Res<Time<Real>>,
     benchmark: Res<Benchmark>,
     players: Query<(), With<LocalPlayer>>,
+    pipelines: Option<Res<PipelinesReady>>,
     diagnostics: Option<Res<DiagnosticsStore>>,
     mut recording: Local<Recording>,
     mut exit: MessageWriter<AppExit>,
@@ -64,7 +101,18 @@ fn record_frames(
         return;
     }
     if !recording.started {
-        recording.started = true;
+        let ready = match pipelines {
+            Some(pipelines) => pipelines.get(),
+            None => true,
+        };
+        recording.ready_frames = if ready { recording.ready_frames + 1 } else { 0 };
+        if recording.ready_frames >= READY_FRAMES {
+            recording.started = true;
+            info!(
+                "benchmark: recording starts after {:.1} s",
+                time.elapsed_secs()
+            );
+        }
         return;
     }
     let delta = time.delta();
@@ -95,7 +143,7 @@ mod tests {
     use bevy::winit::{UpdateMode, WinitSettings};
     use vespera_client::LocalPlayer;
 
-    use super::{Benchmark, BenchmarkPlugin, enable_benchmark};
+    use super::{Benchmark, BenchmarkPlugin, PipelinesReady, enable_benchmark};
 
     const FRAME: Duration = Duration::from_millis(20);
 
@@ -141,6 +189,26 @@ mod tests {
         let mut app = app(Some(Duration::from_secs(1)), false);
 
         assert_eq!(run(&mut app, 100), None);
+    }
+
+    fn app_with_pipelines(ready: bool) -> App {
+        let mut app = app(Some(Duration::from_secs(1)), true);
+        app.insert_resource(PipelinesReady::new(ready));
+        app
+    }
+
+    #[test]
+    fn the_benchmark_waits_until_the_shader_pipelines_are_ready() {
+        let mut app = app_with_pipelines(false);
+
+        assert_eq!(run(&mut app, 100), None);
+    }
+
+    #[test]
+    fn the_benchmark_records_when_the_shader_pipelines_are_ready() {
+        let mut app = app_with_pipelines(true);
+
+        assert_eq!(run(&mut app, 100), Some(AppExit::Success));
     }
 
     #[test]
@@ -206,6 +274,7 @@ mod tests {
 
         assert!(app.is_plugin_added::<RenderDiagnosticsPlugin>());
         assert!(app.world().contains_resource::<Benchmark>());
+        assert!(app.world().contains_resource::<PipelinesReady>());
     }
 
     #[test]
