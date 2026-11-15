@@ -14,5 +14,8 @@ bevy_replicon_renet = { workspace = true, features = ["client"] }
 vespera_client.workspace = true
 vespera_render.workspace = true
 
+[features]
+profile = ["bevy/trace_tracy"]
+
 [lints]
 workspace = true

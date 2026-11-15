@@ -8,6 +8,10 @@
 - On Windows, `cargo xtask fetch-dxc` downloads the official DXC release of Microsoft and verifies its SHA-256 hash. Then it puts `dxcompiler.dll` and its licenses next to the binaries in `target`. Run it again after `cargo clean`.
 - DXC uses the MIT license and the University of Illinois/NCSA license. Each release package for Windows must contain `dxcompiler.dll` and these licenses.
 - In development builds, the debug information of dependencies contains only line tables. Full debug information made the linker use all memory when many test binaries linked at the same time.
+- To profile the client, build it with `cargo build --workspace --features vespera/profile`. This feature adds the Tracy client of Bevy. Then connect the Tracy profiler or `tracy-capture` to the client.
+- Use the Tracy version of the `tracy-client-sys` crate in `Cargo.lock`. For Bevy 0.20.1, this is Tracy 0.14.1. Other versions cannot connect.
+- The profile build also adds the Tracy client to the shard. Thus, start the shard with the `TRACY_PORT` variable set to a different port, for example `8099`. Then the client keeps the default port 8086.
+- The profile feature selects other Bevy features. Thus, the first profile build builds Bevy again, which takes approximately one hour on the reference computer.
 
 ## 11.2 Test-driven development
 
