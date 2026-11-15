@@ -90,7 +90,8 @@ The import step is deterministic. Asset tests check the output: the triangle bud
 - MPFB builds each body from its recipe and the MakeHuman pack. MPFB adds the Vespera human rig to each body (see 4.2).
 - The file `art/clips.ron` lists the animation clips: the 100STYLE style, the clip code and the cut rules for each clip.
 - The import step runs Blender 5.3 with MPFB 2.0.18 and the scripts in the `xtask/blender/` folder. Only maintainers run the import step.
-- For each clip, the import step finds one loop in the motion capture. A locomotion loop is a straight gait cycle, from one contact of the left foot to the next. An idle loop is a quiet part of the idle capture. The start pose and the end pose of the loop must agree as much as possible.
+- For each clip, the import step finds one loop in the motion capture. A locomotion loop is a straight gait cycle. It starts at a contact of the left foot and stops near the next contact, at most 4 frames away. An idle loop is a quiet part of the idle capture. The start pose and the end pose of the loop must agree as much as possible.
+- The import step divides the remaining pose difference between all frames of the loop. Thus the clip has no jump at the end of the loop.
 - The import step removes the travel from each loop, thus the clip plays in place. It records the ground speed of each clip for distance matching (see 4.4).
 
 ## 10.7 Audio
