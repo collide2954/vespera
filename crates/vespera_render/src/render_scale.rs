@@ -3,6 +3,7 @@ use bevy::render::render_resource::{Extent3d, TextureFormat};
 use bevy::window::PrimaryWindow;
 
 use crate::Quality;
+use crate::scale_controller::{ScaleController, adjust_render_scale};
 
 #[derive(Resource, Debug, Clone, Copy, PartialEq)]
 pub struct RenderScale(pub f32);
@@ -14,8 +15,11 @@ pub struct RenderScalePlugin;
 
 impl Plugin for RenderScalePlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(RenderScale(Quality::LOW.min_render_scale))
-            .add_systems(Update, fit_scene_to_window);
+        let controller =
+            ScaleController::new(Quality::LOW.min_render_scale, Quality::LOW.max_render_scale);
+        app.insert_resource(RenderScale(controller.scale()))
+            .insert_resource(controller)
+            .add_systems(Update, (adjust_render_scale, fit_scene_to_window).chain());
     }
 }
 

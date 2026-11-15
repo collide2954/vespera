@@ -92,6 +92,14 @@ The GPU budget has a total of 14 ms. The remaining 2.7 ms is a reserve.
 
 Each preset is a data file. At the first launch, the client selects a preset from the GPU name and a short benchmark.
 
+The dynamic render scale has 5 steps from the minimum to the maximum of the preset. A controller compares the mean frame time of each 30 frames with the frame budget:
+
+- The frame budget is 1/60 s. With vsync on a display slower than 60 Hz, the budget is one refresh interval of the display.
+- A mean of more than 110% of the budget lowers the scale by one step.
+- After 4 windows with a mean of less than 105% of the budget, the controller raises the scale by one step.
+- With vsync, the frame time does not show the free GPU time. Thus, each raise is a test. A slow window in the 4 windows after a raise stops the test.
+- After each failed test, the controller waits two times longer before the next test, up to 64 windows.
+
 ## 9.7 Measurement
 
 - `cargo xtask bench` starts the client in benchmark mode. The camera follows a fixed path through the test valley at dusk, with 100 bot characters.

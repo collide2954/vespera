@@ -6,6 +6,7 @@ mod frame_times;
 mod presentation;
 mod quality;
 mod render_scale;
+mod scale_controller;
 mod targets;
 
 pub use backends::{DXC_LIBRARY, dxc_next_to, render_backends, shader_compiler};
