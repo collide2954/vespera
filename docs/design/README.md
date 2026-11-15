@@ -74,3 +74,4 @@ This folder contains the design of Vespera. The design has two parts:
 | D40 | Shader compiler on Windows | DXC from the official release of Microsoft, as `dxcompiler.dll` next to the client. FXC made the main render pass approximately 30 times slower on the reference computer. | 9.1 |
 | D41 | Human rig | The `game_engine` rig of MPFB: 53 bones, with fingers and without face bones. | 4.2 |
 | D42 | Human LOD 0 | The import step simplifies the MakeHuman meshes to the triangle budget. The source files keep the full detail. | 10.6 |
+| D43 | Human sources | Text recipes in the repository. MPFB builds the bodies from the recipes and the MakeHuman pack. | 10.6 |

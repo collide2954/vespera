@@ -71,7 +71,7 @@ The git repository is text-only. All binary files are in the asset store.
 
 ## 10.6 Asset pipeline
 
-1. Source. The original packs and the Blender files, in source archives.
+1. Source. The original packs, in source archives, and the text recipes in the `art/` folder.
 2. Import. `cargo xtask import-assets` does these steps:
    - It converts the axes and the scale.
    - It gives the bones their Vespera joint names.
@@ -83,6 +83,15 @@ The git repository is text-only. All binary files are in the asset store.
 3. Runtime bundle. The import step writes the processed files to a runtime archive. The client and the server load only runtime files.
 
 The import step is deterministic. Asset tests check the output: the triangle budgets, the texture sizes, the joint names and a license record for each file.
+
+### Humans and clips
+
+- A text recipe in the `art/humans/` folder describes each human: the shape values, the skin, the eyes, the hair and the clothes. Thus the repository contains the full source of each body as text.
+- MPFB builds each body from its recipe and the MakeHuman pack. MPFB adds the Vespera human rig to each body (see 4.2).
+- The file `art/clips.ron` lists the animation clips: the 100STYLE style, the clip code and the cut rules for each clip.
+- The import step runs Blender 5.3 with MPFB 2.0.18 and the scripts in the `xtask/blender/` folder. Only maintainers run the import step.
+- For each clip, the import step finds one loop in the motion capture. A locomotion loop is a straight gait cycle, from one contact of the left foot to the next. An idle loop is a quiet part of the idle capture. The start pose and the end pose of the loop must agree as much as possible.
+- The import step removes the travel from each loop, thus the clip plays in place. It records the ground speed of each clip for distance matching (see 4.4).
 
 ## 10.7 Audio
 
