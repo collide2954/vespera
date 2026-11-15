@@ -3,6 +3,7 @@ use std::time::Duration;
 use bevy::diagnostic::DiagnosticsStore;
 use bevy::prelude::*;
 use bevy::window::{MonitorSelection, PresentMode, WindowMode};
+use bevy::winit::WinitSettings;
 use vespera_client::LocalPlayer;
 
 use crate::{FrameTimes, GpuPassTimes};
@@ -26,13 +27,14 @@ impl Plugin for BenchmarkPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Startup,
-            prepare_windows.run_if(resource_exists::<Benchmark>),
+            prepare_measurement.run_if(resource_exists::<Benchmark>),
         )
         .add_systems(Update, record_frames.run_if(resource_exists::<Benchmark>));
     }
 }
 
-fn prepare_windows(mut windows: Query<&mut Window>) {
+fn prepare_measurement(mut commands: Commands, mut windows: Query<&mut Window>) {
+    commands.insert_resource(WinitSettings::continuous());
     for mut window in &mut windows {
         window.present_mode = PresentMode::AutoNoVsync;
         window.mode = WindowMode::BorderlessFullscreen(MonitorSelection::Current);
@@ -78,6 +80,7 @@ mod tests {
     use bevy::prelude::*;
     use bevy::time::TimeUpdateStrategy;
     use bevy::window::{MonitorSelection, PresentMode, WindowMode};
+    use bevy::winit::{UpdateMode, WinitSettings};
     use vespera_client::LocalPlayer;
 
     use super::{Benchmark, BenchmarkPlugin};
@@ -159,6 +162,22 @@ mod tests {
         assert_eq!(
             window_after_start(Some(Duration::from_secs(1))).map(|(_, mode)| mode),
             Some(WindowMode::BorderlessFullscreen(MonitorSelection::Current))
+        );
+    }
+
+    #[test]
+    fn the_benchmark_updates_without_pauses_also_without_the_focus() {
+        let mut app = app(Some(Duration::from_secs(1)), true);
+
+        app.update();
+
+        let modes = app
+            .world()
+            .get_resource::<WinitSettings>()
+            .map(|settings| (settings.focused_mode, settings.unfocused_mode));
+        assert_eq!(
+            modes,
+            Some((UpdateMode::Continuous, UpdateMode::Continuous))
         );
     }
 
