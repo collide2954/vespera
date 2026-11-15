@@ -1,14 +1,14 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result, bail, ensure};
 
 use crate::assets::{self, Curl};
 use crate::comments::{self, Allowlist};
 use crate::finding::Finding;
+use crate::import::{self, Program};
 use crate::{bench, docs, dxc, layers, repository, text_only};
 
-const COMMANDS: &str =
-    "bench, check-text-only, check-comments, check-docs, check-layers, fetch-assets, fetch-dxc";
+const COMMANDS: &str = "bench, check-text-only, check-comments, check-docs, check-layers, fetch-assets, fetch-dxc, import-assets";
 const BENCH_SECONDS: u64 = 30;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -19,12 +19,13 @@ enum Check {
     Layers,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum Task {
     Bench { seconds: u64 },
     Check(Check),
     FetchAssets,
     FetchDxc,
+    ImportAssets { sources: PathBuf },
 }
 
 pub fn run(arguments: impl Iterator<Item = String>) -> Result<()> {
@@ -32,9 +33,19 @@ pub fn run(arguments: impl Iterator<Item = String>) -> Result<()> {
     match parse(arguments)? {
         Task::Bench { seconds } => bench::run(&root, seconds),
         Task::Check(check) => run_check(check, &root),
-        Task::FetchAssets => assets::fetch(&root, &Curl, &mut |line| println!("{line}")),
-        Task::FetchDxc => dxc::fetch(&root, &Curl, &mut |line| println!("{line}")),
+        Task::FetchAssets => assets::fetch(&root, &Curl, &mut print_line),
+        Task::FetchDxc => dxc::fetch(&root, &Curl, &mut print_line),
+        Task::ImportAssets { sources } => import::run(
+            &root,
+            &sources,
+            &Program::from_environment(),
+            &mut print_line,
+        ),
     }
+}
+
+fn print_line(line: String) {
+    println!("{line}");
 }
 
 fn run_check(check: Check, root: &Path) -> Result<()> {
@@ -66,6 +77,11 @@ fn parse(mut arguments: impl Iterator<Item = String>) -> Result<Task> {
         "check-layers" => Task::Check(Check::Layers),
         "fetch-assets" => Task::FetchAssets,
         "fetch-dxc" => Task::FetchDxc,
+        "import-assets" => Task::ImportAssets {
+            sources: arguments.next().map(PathBuf::from).context(
+                "import-assets needs the folder of the source packs, with 100style/100STYLE.zip in it",
+            )?,
+        },
         unknown => bail!("unknown command: {unknown}. Use one of these commands: {COMMANDS}"),
     };
     ensure!(
@@ -101,6 +117,8 @@ fn report(findings: &[Finding]) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
+
     use super::{Check, Task, parse, report};
     use crate::finding::Finding;
 
@@ -155,6 +173,28 @@ mod tests {
     #[test]
     fn fetch_dxc_is_a_command() {
         assert_eq!(parse(arguments(&["fetch-dxc"])).unwrap(), Task::FetchDxc);
+    }
+
+    #[test]
+    fn import_assets_takes_the_folder_of_the_source_packs() {
+        assert_eq!(
+            parse(arguments(&["import-assets", "C:/vespera-sources"])).unwrap(),
+            Task::ImportAssets {
+                sources: PathBuf::from("C:/vespera-sources")
+            }
+        );
+    }
+
+    #[test]
+    fn import_assets_without_a_folder_is_an_error_that_names_the_archive() {
+        let error = format!("{:#}", parse(arguments(&["import-assets"])).unwrap_err());
+
+        assert!(error.contains("100STYLE.zip"), "{error}");
+    }
+
+    #[test]
+    fn import_assets_rejects_a_second_folder() {
+        assert!(parse(arguments(&["import-assets", "a", "b"])).is_err());
     }
 
     #[test]

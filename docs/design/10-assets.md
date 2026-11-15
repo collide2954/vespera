@@ -90,6 +90,8 @@ The import step is deterministic. Asset tests check the output: the triangle bud
 - MPFB builds each body from its recipe and the MakeHuman pack. MPFB adds the Vespera human rig to each body (see 4.2).
 - The file `art/clips.ron` lists the animation clips: the 100STYLE style, the clip code and the cut rules for each clip.
 - The import step runs Blender 5.3 with MPFB 2.0.18 and the scripts in the `xtask/blender/` folder. Only maintainers run the import step.
+- To run the import step, use `cargo xtask import-assets <sources>`. The sources folder contains the original packs, for example `100style/100STYLE.zip`. If Blender is not on the path, set the `BLENDER` variable to the Blender program.
+- For each human, the import step writes a glTF binary file to the `assets/humans` folder. The file contains the body, the rig and all clips. A JSON file next to it gives the length and the ground speed of each clip.
 - For each clip, the import step finds one loop in the motion capture. A locomotion loop is a straight gait cycle. It starts at a contact of the left foot and stops near the next contact, at most 4 frames away. An idle loop is a quiet part of the idle capture. The start pose and the end pose of the loop must agree as much as possible.
 - The import step divides the remaining pose difference between all frames of the loop. Thus the clip has no jump at the end of the loop.
 - The import step removes the travel from each loop, thus the clip plays in place. It records the ground speed of each clip for distance matching (see 4.4).

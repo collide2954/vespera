@@ -1,0 +1,12 @@
+(
+    shape: {
+        "gender": 0.0,
+        "height": 0.6,
+    },
+    skin: "Young caucasian female",
+    eyes: "Low-poly",
+    eyebrows: "Eyebrow010",
+    eyelashes: "Eyelashes02",
+    hair: "Ponytail01",
+    clothes: ["Female elegantsuit01", "Shoes03"],
+)

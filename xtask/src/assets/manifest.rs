@@ -3,6 +3,8 @@ use std::collections::HashSet;
 use anyhow::{Context, Result, ensure};
 use serde::Deserialize;
 
+use crate::naming::is_snake_case;
+
 pub const APPROVED_LICENSES: [&str; 3] = ["CC0-1.0", "CC-BY-4.0", "OFL-1.1"];
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -73,15 +75,6 @@ impl Archive {
         }
         Ok(())
     }
-}
-
-fn is_snake_case(name: &str) -> bool {
-    name.split('_').all(|word| {
-        !word.is_empty()
-            && word
-                .bytes()
-                .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit())
-    })
 }
 
 fn is_sha256(hash: &str) -> bool {

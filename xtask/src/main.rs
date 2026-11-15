@@ -5,7 +5,9 @@ mod comments;
 mod docs;
 mod dxc;
 mod finding;
+mod import;
 mod layers;
+mod naming;
 mod repository;
 mod text_only;
 

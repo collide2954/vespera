@@ -7075,6 +7075,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "ra-ap-rustc_lexer",
+ "ron",
  "serde",
  "serde_json",
  "sha2",

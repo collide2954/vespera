@@ -1,0 +1,22 @@
+(
+    clips: [
+        (
+            name: "idle",
+            style: "Neutral",
+            capture: Idle,
+            cut: Idle(min_seconds: 2.0, max_seconds: 4.0, max_travel_meters: 0.15),
+        ),
+        (
+            name: "walk",
+            style: "Neutral",
+            capture: ForwardWalk,
+            cut: Cycle(min_seconds: 0.8, max_seconds: 1.6, max_turn_degrees: 4.0),
+        ),
+        (
+            name: "jog",
+            style: "Neutral",
+            capture: ForwardRun,
+            cut: Cycle(min_seconds: 0.45, max_seconds: 1.0, max_turn_degrees: 5.0),
+        ),
+    ],
+)
