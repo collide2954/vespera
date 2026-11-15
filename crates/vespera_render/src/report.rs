@@ -218,6 +218,10 @@ mod tests {
     }
 
     #[test]
+    #[cfg_attr(
+        target_os = "macos",
+        ignore = "on macOS, Bevy selects the apple-app-store feature of sysinfo, which has no process data"
+    )]
     fn the_test_process_uses_some_memory() {
         assert!(process_memory_mb().is_some_and(|megabytes| megabytes > 1.0));
     }
