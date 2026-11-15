@@ -75,7 +75,10 @@ mod tests {
         assert!((Quality::LOW.min_render_scale - 0.67).abs() < 1e-6);
         assert!((Quality::LOW.max_render_scale - 1.0).abs() < 1e-6);
         assert_eq!(
-            (Quality::LOW.indirect_drawing, Quality::LOW.gpu_light_clustering),
+            (
+                Quality::LOW.indirect_drawing,
+                Quality::LOW.gpu_light_clustering
+            ),
             (false, false)
         );
     }
